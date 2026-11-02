@@ -14,6 +14,7 @@ import { calculatePoissonProbability, calculateFootballProbabilities } from '../
 import { calculateBasketballProbabilities } from '../core/stats/basketballModel.ts';
 import { calculateEmpiricalProbabilities } from '../core/stats/empiricalProbabilities.ts';
 import { SeasonStandingsService } from '../data/services/seasonStandingsService.ts';
+import { RealOddsService } from '../data/services/realOddsService.ts';
 
 test('1. Guardia de Muestra Mínima (Sample Guard)', async (t) => {
   await t.test('debe bloquear cálculos si la muestra es menor a 5 partidos', () => {
@@ -190,5 +191,29 @@ test('7. Servicio de Clasificaciones Oficiales de Temporada (SeasonStandingsServ
     assert.ok(fbCodes.includes('esp.1'));
     const nbaCodes = SeasonStandingsService.resolveLeagueCodes('nba', 'basketball');
     assert.deepEqual(nbaCodes, ['nba']);
+  });
+});
+
+test('8. Servicio de Cuotas Reales de Casas de Apuestas (RealOddsService)', async (t) => {
+  await t.test('debe convertir cuotas americanas positivas a formato decimal europeo', () => {
+    assert.equal(RealOddsService.parseToDecimal('+110'), 2.1);
+    assert.equal(RealOddsService.parseToDecimal('+220'), 3.2);
+    assert.equal(RealOddsService.parseToDecimal('+285'), 3.85);
+  });
+
+  await t.test('debe convertir cuotas americanas negativas a formato decimal europeo', () => {
+    assert.equal(RealOddsService.parseToDecimal('-150'), 1.67);
+    assert.equal(RealOddsService.parseToDecimal('-200'), 1.5);
+  });
+
+  await t.test('debe preservar cuotas ya expresadas en formato decimal', () => {
+    assert.equal(RealOddsService.parseToDecimal('2.10'), 2.1);
+    assert.equal(RealOddsService.parseToDecimal(1.95), 1.95);
+  });
+
+  await t.test('debe devolver null para entradas inválidas o vacías', () => {
+    assert.equal(RealOddsService.parseToDecimal(''), null);
+    assert.equal(RealOddsService.parseToDecimal(undefined), null);
+    assert.equal(RealOddsService.parseToDecimal('abc'), null);
   });
 });

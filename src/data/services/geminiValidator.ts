@@ -67,8 +67,8 @@ export class GeminiValidator {
       const textToScan = `${parsed.resumen} ${parsed.porQue.join(' ')}`;
       const foundNumbers = this.extractNumbers(textToScan);
 
-      // Números base que siempre son legítimos en el contexto (ventanas, redondeos estándar, etc.)
-      const standardAllowed = new Set([0, 1, 2, 3, 5, 10, 100, 215.5, 2.5, 250]);
+      // Números base que siempre son legítimos en el contexto (ventanas, redondeos estándar, nombre de Bet365, etc.)
+      const standardAllowed = new Set([0, 1, 2, 3, 5, 10, 100, 215.5, 2.5, 250, 365]);
       for (const num of allowedNumbers) {
         standardAllowed.add(num);
         standardAllowed.add(Math.round(num));

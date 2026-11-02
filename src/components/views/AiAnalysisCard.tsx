@@ -283,11 +283,16 @@ export function AiAnalysisCard({
             </ul>
           </div>
 
-          {/* 3. Tabla de Mercados y Cuotas Justas */}
+          {/* 3. Tabla de Mercados y Cuotas Justas vs Casas de Apuestas */}
           <div style={{ marginBottom: '1.25rem' }}>
-            <h4 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: '0.5rem' }}>
-              Evaluación de Mercados y Cuotas
-            </h4>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', flexWrap: 'wrap', gap: '0.4rem' }}>
+              <h4 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--color-text-primary)', margin: 0 }}>
+                Evaluación de Mercados: Cuota Justa vs Casas (Bet365 / Winamax)
+              </h4>
+              <span style={{ fontSize: '0.6875rem', color: 'var(--color-text-muted)' }}>
+                Referencias oficiales de mercado regulado
+              </span>
+            </div>
             <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
               <table
                 style={{
@@ -302,8 +307,8 @@ export function AiAnalysisCard({
                     <th style={{ padding: '0.6rem 0.75rem', color: 'var(--color-text-secondary)', fontWeight: 600 }}>Mercado / Opción</th>
                     <th style={{ padding: '0.6rem 0.75rem', color: 'var(--color-text-secondary)', fontWeight: 600 }}>Prob. Modelo</th>
                     <th style={{ padding: '0.6rem 0.75rem', color: 'var(--color-secondary)', fontWeight: 600 }}>Cuota Justa</th>
-                    <th style={{ padding: '0.6rem 0.75rem', color: 'var(--color-text-secondary)', fontWeight: 600 }}>Cuota Real</th>
-                    <th style={{ padding: '0.6rem 0.75rem', color: 'var(--color-text-secondary)', fontWeight: 600 }}>Lectura</th>
+                    <th style={{ padding: '0.6rem 0.75rem', color: 'var(--color-accent)', fontWeight: 600 }}>Cuota Real (Bet365 / Winamax)</th>
+                    <th style={{ padding: '0.6rem 0.75rem', color: 'var(--color-text-secondary)', fontWeight: 600 }}>Lectura y Valor</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -324,8 +329,32 @@ export function AiAnalysisCard({
                       <td style={{ padding: '0.6rem 0.75rem', fontVariantNumeric: 'tabular-nums', fontWeight: 600, color: 'var(--color-secondary)' }}>
                         {m.cuotaJusta != null ? m.cuotaJusta.toFixed(2) : 'Sin datos'}
                       </td>
-                      <td style={{ padding: '0.6rem 0.75rem', fontVariantNumeric: 'tabular-nums', color: m.cuotaReal != null ? 'var(--color-accent)' : 'var(--color-text-muted)' }}>
-                        {m.cuotaReal != null ? m.cuotaReal.toFixed(2) : 'Sin datos'}
+                      <td style={{ padding: '0.6rem 0.75rem', fontVariantNumeric: 'tabular-nums' }}>
+                        {m.cuotaReal != null ? (
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                            <span style={{ fontWeight: 600, color: 'var(--color-accent)' }}>
+                              {m.cuotaReal.toFixed(2)}
+                            </span>
+                            {m.cuotaJusta != null && m.cuotaReal > m.cuotaJusta ? (
+                              <span
+                                style={{
+                                  fontSize: '0.625rem',
+                                  padding: '1px 5px',
+                                  borderRadius: '3px',
+                                  background: 'rgba(45, 212, 167, 0.15)',
+                                  color: 'var(--color-accent)',
+                                  fontWeight: 600,
+                                  border: '1px solid rgba(45, 212, 167, 0.3)',
+                                }}
+                                title="Cuota de la casa superior a la cuota justa matemática"
+                              >
+                                Valor Teórico
+                              </span>
+                            ) : null}
+                          </div>
+                        ) : (
+                          <span style={{ color: 'var(--color-text-muted)' }}>Sin datos</span>
+                        )}
                       </td>
                       <td style={{ padding: '0.6rem 0.75rem', color: 'var(--color-text-secondary)', fontSize: '0.75rem' }}>
                         {m.lectura}

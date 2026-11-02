@@ -48,8 +48,8 @@ export class TemplateExplainer {
 
     // 2. Por qué (Razones cuantitativas respaldadas)
     const porQue: string[] = [];
-    const homeFreq = matchDetail.frequencies5.home;
-    const awayFreq = matchDetail.frequencies5.away;
+    const homeFreq = matchDetail.frequencies10.home;
+    const awayFreq = matchDetail.frequencies10.away;
 
     porQue.push(
       `${analysis.homeTeamName} presenta una media de ${homeFreq.avgGoalsOrPointsScored} ${isFb ? 'goles anotados' : 'puntos anotados'} y ${homeFreq.avgGoalsOrPointsConceded} recibidos por partido en la temporada.`

@@ -15,6 +15,7 @@ import { analyzeMatchMarkets, type MatchMarketAnalysis } from '../../core/stats/
 import { TemplateExplainer, type StructuredAnalysisResponse } from '../../core/stats/templateExplainer.ts';
 import { GeminiQuotaTracker, type GeminiQuotaStatus } from '../cache/geminiQuotaTracker.ts';
 import { GeminiValidator } from './geminiValidator.ts';
+import { RealOddsService } from './realOddsService.ts';
 import { CacheManager } from '../cache/cacheManager.ts';
 import { logError, logInfo } from '../logger.ts';
 
@@ -37,11 +38,13 @@ export class GeminiService {
     match: MatchDetail,
     forceRefresh: boolean = false
   ): Promise<AiAnalysisResult> {
-    const marketAnalysis = analyzeMatchMarkets(match);
+    // Obtener cuotas reales oficiales de casas de apuestas (Bet365 / Winamax)
+    const realOdds = await RealOddsService.getMatchRealOdds(match);
+    const marketAnalysis = analyzeMatchMarkets(match, realOdds || undefined);
     const quota = GeminiQuotaTracker.getStatus();
 
     // 1. Clave de caché que depende del contenido de los datos (no regenerar si no cambian)
-    const dataFingerprint = `${match.id}_${match.probabilities.homeWinProb}_${match.probabilities.awayWinProb}_${match.frequencies5.home.homeTeamWins}_${match.date}`;
+    const dataFingerprint = `${match.id}_${match.probabilities.homeWinProb}_${match.probabilities.awayWinProb}_${realOdds?.oneXTwo?.home || 'no_odds'}_${match.date}`;
     const cacheKey = `gemini_analysis_${dataFingerprint}`;
 
     if (!forceRefresh) {
@@ -87,27 +90,44 @@ export class GeminiService {
     }
 
     // 4. Preparar el JSON estricto para Gemini y recolectar números válidos para el validador
+    const freqHome = match.frequencies10?.home || match.frequencies5.home;
+    const freqAway = match.frequencies10?.away || match.frequencies5.away;
+
     const allowedNumbers: number[] = [
       match.probabilities.homeWinProb,
       match.probabilities.awayWinProb,
       match.probabilities.drawProb || 0,
       match.probabilities.expectedHomeScore,
       match.probabilities.expectedAwayScore,
-      match.frequencies5.home.homeTeamWins,
-      match.frequencies5.away.homeTeamWins,
-      match.frequencies5.home.avgGoalsOrPointsScored,
-      match.frequencies5.home.avgGoalsOrPointsConceded,
-      match.frequencies5.away.avgGoalsOrPointsScored,
-      match.frequencies5.away.avgGoalsOrPointsConceded,
-      match.frequencies5.home.over25GoalsOrOverPointsRate,
-      match.frequencies5.away.over25GoalsOrOverPointsRate,
+      freqHome.homeTeamWins,
+      freqHome.awayTeamWins,
+      freqHome.draws || 0,
+      freqHome.totalMatchesEvaluated || 0,
+      freqHome.winsCount || 0,
+      freqHome.drawsCount || 0,
+      freqHome.lossesCount || 0,
+      freqHome.avgGoalsOrPointsScored,
+      freqHome.avgGoalsOrPointsConceded,
+      freqAway.homeTeamWins,
+      freqAway.awayTeamWins,
+      freqAway.draws || 0,
+      freqAway.totalMatchesEvaluated || 0,
+      freqAway.winsCount || 0,
+      freqAway.drawsCount || 0,
+      freqAway.lossesCount || 0,
+      freqAway.avgGoalsOrPointsScored,
+      freqAway.avgGoalsOrPointsConceded,
+      freqHome.over25GoalsOrOverPointsRate,
+      freqAway.over25GoalsOrOverPointsRate,
     ];
 
     for (const m of marketAnalysis.markets) {
+      if (m.margenCasa != null) allowedNumbers.push(m.margenCasa);
       for (const item of m.items) {
         if (item.cuotaJusta != null) allowedNumbers.push(item.cuotaJusta);
         if (item.cuotaReal != null) allowedNumbers.push(item.cuotaReal);
         if (item.probImplicita != null) allowedNumbers.push(item.probImplicita);
+        if (item.diferenciaCuota != null) allowedNumbers.push(item.diferenciaCuota);
       }
     }
 
@@ -120,23 +140,27 @@ export class GeminiService {
         fecha: match.date,
         horario: match.time,
       },
-      estadisticasFrecuencia: {
-        ventana: 'Ultimos 5 partidos',
+      casasApuestasReferencia: realOdds ? 'Bet365 / Winamax' : 'Sin datos de cuotas de casas',
+      rendimientoTemporadaCompeticion: {
+        competicion: match.league.name,
         local: {
-          victoriasPct: match.frequencies5.home.homeTeamWins,
-          empatesPct: match.frequencies5.home.draws,
-          mediaAnotada: match.frequencies5.home.avgGoalsOrPointsScored,
-          mediaRecibida: match.frequencies5.home.avgGoalsOrPointsConceded,
+          partidosJugados: freqHome.totalMatchesEvaluated,
+          victoriasPct: freqHome.homeTeamWins,
+          empatesPct: freqHome.draws,
+          derrotasPct: freqHome.awayTeamWins,
+          mediaAnotada: freqHome.avgGoalsOrPointsScored,
+          mediaRecibida: freqHome.avgGoalsOrPointsConceded,
         },
         visitante: {
-          victoriasPct: match.frequencies5.away.homeTeamWins,
-          empatesPct: match.frequencies5.away.draws,
-          mediaAnotada: match.frequencies5.away.avgGoalsOrPointsScored,
-          mediaRecibida: match.frequencies5.away.avgGoalsOrPointsConceded,
+          partidosJugados: freqAway.totalMatchesEvaluated,
+          victoriasPct: freqAway.homeTeamWins,
+          empatesPct: freqAway.draws,
+          derrotasPct: freqAway.awayTeamWins,
+          mediaAnotada: freqAway.avgGoalsOrPointsScored,
+          mediaRecibida: freqAway.avgGoalsOrPointsConceded,
         },
       },
-      rendimientoTemporada: {
-        fuente: match.probabilities.modelName,
+      rendimientoProbabilidad: {
         probabilidadVictoriaLocal: match.probabilities.homeWinProb,
         probabilidadEmpate: match.probabilities.drawProb,
         probabilidadVictoriaVisitante: match.probabilities.awayWinProb,
@@ -144,15 +168,16 @@ export class GeminiService {
         promedioAnotadoVisitante: match.probabilities.expectedAwayScore,
         confianzaCodigo: marketAnalysis.confidence.level,
       },
-      mercados: marketAnalysis.markets.map((m) => ({
+      mercadosYCuotasCasas: marketAnalysis.markets.map((m) => ({
         nombre: m.marketName,
         margenCasa: m.margenCasa != null ? `${m.margenCasa}%` : 'Sin datos',
         selecciones: m.items.map((i) => ({
           seleccion: i.selection,
           probabilidadModelo: `${i.probModelo}%`,
           cuotaJusta: i.cuotaJusta != null ? i.cuotaJusta : 'Sin datos',
-          cuotaReal: i.cuotaReal != null ? i.cuotaReal : 'Sin datos',
-          probabilidadImplicita: i.probImplicita != null ? `${i.probImplicita}%` : 'Sin datos',
+          cuotaRealCasas: i.cuotaReal != null ? i.cuotaReal : 'Sin datos',
+          probabilidadImplicitaCasa: i.probImplicita != null ? `${i.probImplicita}%` : 'Sin datos',
+          diferenciaValor: i.diferenciaCuota != null ? i.diferenciaCuota : 'Sin datos',
         })),
       })),
     };
@@ -167,7 +192,7 @@ export class GeminiService {
         const ai = new GoogleGenAI({ apiKey });
         const response = await ai.models.generateContent({
           model: modelName,
-          contents: `DATOS DEL PARTIDO EN JSON:\n${JSON.stringify(payload, null, 2)}\n\nGenera el análisis en formato JSON estricto con los campos: resumen, porQue (lista), mercados (lista con mercado, probModelo, cuotaJusta, cuotaReal, lectura), riesgos (lista) y aviso.`,
+          contents: `DATOS DEL PARTIDO Y CUOTAS DE CASAS DE APUESTAS (Bet365 / Winamax) EN JSON:\n${JSON.stringify(payload, null, 2)}\n\nGenera el análisis en formato JSON estricto con los campos: resumen, porQue (lista), mercados (lista con mercado, probModelo, cuotaJusta, cuotaReal, lectura), riesgos (lista) y aviso. Analiza cómo comparan las cuotas de Bet365/Winamax frente a las cuotas justas del modelo y su margen comercial.`,
           config: {
             systemInstruction: this.SYSTEM_PROMPT,
             temperature: 0.2,
