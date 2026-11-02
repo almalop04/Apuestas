@@ -1,0 +1,127 @@
+/**
+ * SISTEMA DE DISEÑO - ANALÍTICA DEPORTIVA PROFESIONAL
+ * Tokens de diseño base (CSS Variables)
+ * 
+ * Reglas de diseño:
+ * - Espaciado en múltiplos de 4px / 8px
+ * - Tipografía con cifras tabulares para alineación numérica
+ * - Contraste accesible >= 4.5:1
+ * - Objetivos táctiles mínimos de 44px
+ */
+
+:root {
+  /* ==========================================================================
+     1. PALETA DE COLOR (TEMA OSCURO ANALÍTICO)
+     ========================================================================== */
+  
+  /* Fondos y Superficies */
+  --color-bg: #0B1018;             /* Fondo principal de la aplicación */
+  --color-surface: #111A27;        /* Tarjetas, paneles y barras laterales */
+  --color-surface-hover: #162234;  /* Estados hover de tarjetas y filas */
+  --color-surface-active: #1D2B42; /* Estados activos / presionados */
+  --color-surface-subtle: #0E1520; /* Fondos de apoyo e inputs inactivos */
+
+  /* Bordes y Divisores */
+  --color-border: #1B2636;         /* Bordes de tarjetas y separadores */
+  --color-border-subtle: #151F2D;  /* Separadores internos sutiles */
+  --color-border-focus: #5B8CFF;   /* Foco accesible por teclado */
+
+  /* Textos y Contrastes */
+  --color-text-primary: #E6EDF5;   /* Texto principal (contraste 12.8:1 sobre fondo) */
+  --color-text-secondary: #8CA0B6; /* Texto secundario, etiquetas (contraste 5.2:1) */
+  --color-text-muted: #5E7188;     /* Marcas de tiempo, metadatos secundarios */
+  --color-text-disabled: #425265;  /* Elementos deshabilitados */
+
+  /* Acentos de Datos (Semántica estricta) */
+  --color-accent: #2DD4A7;         /* Verde esmeralda: Datos positivos, acento de datos */
+  --color-accent-subtle: rgba(45, 212, 167, 0.12); /* Fondo de chips positivos */
+  
+  --color-secondary: #5B8CFF;      /* Azul analítico: Probabilidad estimada, enlaces */
+  --color-secondary-subtle: rgba(91, 140, 255, 0.12); /* Fondo probabilidad */
+
+  --color-warning: #F5B84B;        /* Ámbar: Avisos, estado "Sin datos", muestra baja */
+  --color-warning-subtle: rgba(245, 184, 75, 0.12); /* Fondo alertas "Sin datos" */
+
+  --color-danger: #FF5C5C;         /* Rojo: Métricas bajas, derrotas, errores */
+  --color-danger-subtle: rgba(255, 92, 92, 0.12);
+
+  --color-neutral-draw: #A0B2C6;   /* Gris azulado: Empates (fútbol) */
+
+  /* ==========================================================================
+     2. TIPOGRAFÍA (INTER + CIFRAS TABULARES)
+     ========================================================================== */
+  --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-feature-numeric: tabular-nums; /* Fuerza ancho fijo en números para tablas */
+
+  /* Pesos de fuente limitados (Máximo 2 pesos por pantalla para evitar fatiga) */
+  --font-weight-regular: 400;
+  --font-weight-semibold: 600;
+
+  /* Tamaños de fuente y alturas de línea */
+  --font-size-xs: 0.75rem;    /* 12px - Metadatos, fuentes, horas */
+  --line-height-xs: 1rem;     /* 16px */
+
+  --font-size-sm: 0.875rem;   /* 14px - Textos secundarios, celdas de tabla */
+  --line-height-sm: 1.25rem;  /* 20px */
+
+  --font-size-base: 1rem;     /* 16px - Texto cuerpo, navegación */
+  --line-height-base: 1.5rem; /* 24px */
+
+  --font-size-lg: 1.125rem;   /* 18px - Subtítulos, nombres de equipos */
+  --line-height-lg: 1.75rem;  /* 28px */
+
+  --font-size-xl: 1.375rem;   /* 22px - Encabezados de sección */
+  --line-height-xl: 1.75rem;  /* 28px */
+
+  --font-size-2xl: 1.75rem;   /* 28px - Título principal H1 */
+  --line-height-2xl: 2.25rem; /* 36px */
+
+  --font-size-metric: 2rem;   /* 32px - Cifras grandes de probabilidad */
+  --line-height-metric: 2.25rem;
+
+  /* ==========================================================================
+     3. ESPACIADO (SISTEMA EN MÚLTIPLOS DE 4PX / 8PX)
+     ========================================================================== */
+  --space-1: 0.25rem;  /* 4px */
+  --space-2: 0.5rem;   /* 8px */
+  --space-3: 0.75rem;  /* 12px */
+  --space-4: 1rem;     /* 16px */
+  --space-5: 1.25rem;  /* 20px */
+  --space-6: 1.5rem;   /* 24px */
+  --space-8: 2rem;     /* 32px */
+  --space-10: 2.5rem;  /* 40px */
+  --space-12: 3rem;    /* 48px */
+  --space-16: 4rem;    /* 64px */
+
+  /* ==========================================================================
+     4. RADIOS DE BORDE (SUTILES Y ELEGANTES)
+     ========================================================================== */
+  --radius-xs: 4px;   /* Chips, badges pequeños */
+  --radius-sm: 6px;   /* Botones, selectores */
+  --radius-md: 8px;   /* Entradas de texto, tooltips */
+  --radius-lg: 12px;  /* Tarjetas, modales */
+  --radius-xl: 16px;  /* Paneles flotantes */
+  --radius-full: 9999px; /* Píldoras */
+
+  /* ==========================================================================
+     5. SOMBRAS Y PROFUNDIDAD (DISEÑADAS PARA FONDO OSCURO)
+     ========================================================================== */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 12px 28px -4px rgba(0, 0, 0, 0.6), 0 4px 8px -2px rgba(0, 0, 0, 0.4);
+  --shadow-glow-accent: 0 0 16px rgba(45, 212, 167, 0.15);
+  --shadow-glow-secondary: 0 0 16px rgba(91, 140, 255, 0.15);
+
+  /* ==========================================================================
+     6. OBJETIVOS TÁCTILES Y ACCESIBILIDAD (MÓVIL PRIMERO)
+     ========================================================================== */
+  --touch-target-min: 44px; /* Tamaño mínimo interactivo táctil */
+  --outline-focus: 2px solid var(--color-border-focus);
+  --outline-offset: 2px;
+
+  /* ==========================================================================
+     7. TRANSICIONES Y MICRO-ANIMACIONES
+     ========================================================================== */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}

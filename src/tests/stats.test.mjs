@@ -1,0 +1,144 @@
+/**
+ * PRUEBAS AUTOMÁTICAS DE CÁLCULO ESTADÍSTICO Y TRATAMIENTO DE DATOS
+ * 
+ * Se ejecutan con el test runner nativo de Node.js: `npm test`
+ */
+
+import test from 'node:test';
+import assert from 'node:assert/strict';
+
+// Módulos a probar (usando compilación TS / lógica directa)
+import { evaluateSampleSize } from '../core/stats/sampleGuard.ts';
+import { calculateFrequencies, calculateWeightedMomentum } from '../core/stats/frequencies.ts';
+import { calculatePoissonProbability, calculateFootballProbabilities } from '../core/stats/poisson.ts';
+import { calculateBasketballProbabilities } from '../core/stats/basketballModel.ts';
+
+test('1. Guardia de Muestra Mínima (Sample Guard)', async (t) => {
+  await t.test('debe bloquear cálculos si la muestra es menor a 5 partidos', () => {
+    const result = evaluateSampleSize(3);
+    assert.equal(result.isSufficient, false);
+    assert.equal(result.badgeType, 'insufficient');
+    assert.match(result.badgeText, /Muestra insuficiente/);
+    assert.match(result.reason || '', /Se requieren al menos 5 partidos/);
+  });
+
+  await t.test('debe permitir cálculos con aviso si la muestra está entre 5 y 9 partidos', () => {
+    const result = evaluateSampleSize(6);
+    assert.equal(result.isSufficient, true);
+    assert.equal(result.badgeType, 'warning');
+    assert.match(result.badgeText, /Muestra básica/);
+  });
+
+  await t.test('debe marcar como óptima una muestra de 10 o más partidos', () => {
+    const result = evaluateSampleSize(10);
+    assert.equal(result.isSufficient, true);
+    assert.equal(result.badgeType, 'sufficient');
+    assert.match(result.badgeText, /Muestra óptima/);
+  });
+});
+
+test('2. Frecuencias Históricas (Últimos 5 y 10 partidos)', async (t) => {
+  const mockMatches = [
+    { teamGoalsOrPoints: 2, opponentGoalsOrPoints: 1, isHome: true, date: '2026-10-25' }, // Win, Total 3 (>2.5), Both scored
+    { teamGoalsOrPoints: 1, opponentGoalsOrPoints: 1, isHome: false, date: '2026-10-20' }, // Draw, Total 2 (<=2.5), Both scored
+    { teamGoalsOrPoints: 0, opponentGoalsOrPoints: 2, isHome: true, date: '2026-10-15' }, // Loss, Total 2 (<=2.5), Only one scored
+    { teamGoalsOrPoints: 3, opponentGoalsOrPoints: 0, isHome: false, date: '2026-10-10' }, // Win, Total 3 (>2.5), Only one scored
+    { teamGoalsOrPoints: 2, opponentGoalsOrPoints: 2, isHome: true, date: '2026-10-05' }, // Draw, Total 4 (>2.5), Both scored
+  ];
+
+  await t.test('calcula correctamente porcentajes de victoria, empate y derrota en fútbol', () => {
+    const freq = calculateFrequencies(mockMatches, 5, 'football');
+    assert.equal(freq.totalMatchesEvaluated, 5);
+    // 2 victorias = 40%
+    assert.equal(freq.homeTeamWins, 40);
+    // 2 empates = 40%
+    assert.equal(freq.draws, 40);
+    // 1 derrota = 20%
+    assert.equal(freq.awayTeamWins, 20);
+    // Suma de porcentajes debe ser 100%
+    assert.equal(freq.homeTeamWins + (freq.draws || 0) + freq.awayTeamWins, 100);
+  });
+
+  await t.test('calcula correctamente Over 2.5 y Ambos Marcan', () => {
+    const freq = calculateFrequencies(mockMatches, 5, 'football');
+    // Partidos con >2.5 goles: partido 1 (3), partido 4 (3), partido 5 (4) = 3 de 5 = 60%
+    assert.equal(freq.over25GoalsOrOverPointsRate, 60);
+    // Ambos marcan: partido 1, partido 2, partido 5 = 3 de 5 = 60%
+    assert.equal(freq.bothTeamsScoredRate, 60);
+  });
+
+  await t.test('devuelve valores neutros seguros si la lista de partidos está vacía', () => {
+    const freq = calculateFrequencies([], 5, 'football');
+    assert.equal(freq.totalMatchesEvaluated, 0);
+    assert.equal(freq.homeTeamWins, 0);
+    assert.equal(freq.avgGoalsOrPointsScored, 0);
+  });
+});
+
+test('3. Momentum Ponderado (Racha reciente)', async (t) => {
+  const matches = [
+    { teamGoalsOrPoints: 3, opponentGoalsOrPoints: 0, isHome: true, date: '2026-10-28' }, // W (peso 5)
+    { teamGoalsOrPoints: 2, opponentGoalsOrPoints: 1, isHome: true, date: '2026-10-24' }, // W (peso 4)
+    { teamGoalsOrPoints: 2, opponentGoalsOrPoints: 2, isHome: false, date: '2026-10-18' }, // D (peso 3)
+    { teamGoalsOrPoints: 0, opponentGoalsOrPoints: 1, isHome: true, date: '2026-10-12' }, // L (peso 2)
+    { teamGoalsOrPoints: 1, opponentGoalsOrPoints: 0, isHome: false, date: '2026-10-06' }, // W (peso 1)
+  ];
+
+  const momentum = calculateWeightedMomentum(matches);
+  assert.equal(momentum.trendDirection, 'up');
+  assert.equal(momentum.sequence.join(''), 'WWDLW');
+  assert.ok(momentum.momentumScore > 60);
+});
+
+test('4. Modelo de Poisson (Fútbol)', async (t) => {
+  await t.test('probabilidad de Poisson elemental', () => {
+    // Si lambda = 1.0, P(0) = e^-1 ≈ 0.367879
+    const p0 = calculatePoissonProbability(0, 1.0);
+    assert.ok(Math.abs(p0 - 0.3678) < 0.001);
+  });
+
+  await t.test('las probabilidades estimadas deben sumar exactamente el 100%', () => {
+    const homeTeam = {
+      avgGoalsScoredHome: 1.8,
+      avgGoalsConcededHome: 0.9,
+      avgGoalsScoredAway: 1.2,
+      avgGoalsConcededAway: 1.1,
+      matchesPlayed: 12,
+    };
+    const awayTeam = {
+      avgGoalsScoredHome: 1.4,
+      avgGoalsConcededHome: 1.3,
+      avgGoalsScoredAway: 1.0,
+      avgGoalsConcededAway: 1.6,
+      matchesPlayed: 12,
+    };
+
+    const result = calculateFootballProbabilities(homeTeam, awayTeam);
+    const sum = result.homeWinProb + (result.drawProb || 0) + result.awayWinProb;
+    assert.equal(sum, 100);
+    assert.ok(result.expectedHomeScore > result.expectedAwayScore);
+    assert.ok(result.homeWinProb > result.awayWinProb);
+    assert.ok(result.explanationText.length > 20);
+  });
+});
+
+test('5. Modelo de Ritmo y Eficiencia (Baloncesto)', async (t) => {
+  const home = {
+    pace: 101.2,
+    offensiveRating: 118.5,
+    defensiveRating: 110.2,
+    matchesPlayed: 14,
+  };
+  const away = {
+    pace: 98.4,
+    offensiveRating: 111.0,
+    defensiveRating: 116.8,
+    matchesPlayed: 14,
+  };
+
+  const result = calculateBasketballProbabilities(home, away);
+  assert.equal(result.homeWinProb + result.awayWinProb, 100);
+  // El local es significativamente superior en rating y juega en casa -> Probabilidad alta
+  assert.ok(result.homeWinProb > 60);
+  assert.ok(result.expectedHomeScore > result.expectedAwayScore);
+});
