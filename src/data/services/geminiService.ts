@@ -135,13 +135,13 @@ export class GeminiService {
           mediaRecibida: match.frequencies5.away.avgGoalsOrPointsConceded,
         },
       },
-      modeloProbabilistico: {
-        nombre: match.probabilities.modelName,
+      rendimientoTemporada: {
+        fuente: match.probabilities.modelName,
         probabilidadVictoriaLocal: match.probabilities.homeWinProb,
         probabilidadEmpate: match.probabilities.drawProb,
         probabilidadVictoriaVisitante: match.probabilities.awayWinProb,
-        marcadorEsperadoLocal: match.probabilities.expectedHomeScore,
-        marcadorEsperadoVisitante: match.probabilities.expectedAwayScore,
+        promedioAnotadoLocal: match.probabilities.expectedHomeScore,
+        promedioAnotadoVisitante: match.probabilities.expectedAwayScore,
         confianzaCodigo: marketAnalysis.confidence.level,
       },
       mercados: marketAnalysis.markets.map((m) => ({
@@ -206,8 +206,8 @@ export class GeminiService {
         fallbackReason: fallbackReason.includes('API_KEY_INVALID')
           ? 'Clave de API no válida o expirada. Usando explicador de respaldo.'
           : fallbackReason.includes('User location is not supported')
-          ? 'Región no soportada temporalmente por la API de Google. Usando explicador de respaldo.'
-          : 'Límite temporal o error en la API de Google. Usando explicador de respaldo.',
+            ? 'Región no soportada temporalmente por la API de Google. Usando explicador de respaldo.'
+            : 'Límite temporal o error en la API de Google. Usando explicador de respaldo.',
         isCached: false,
       };
     }

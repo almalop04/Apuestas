@@ -12,6 +12,7 @@ import { evaluateSampleSize } from '../core/stats/sampleGuard.ts';
 import { calculateFrequencies, calculateWeightedMomentum } from '../core/stats/frequencies.ts';
 import { calculatePoissonProbability, calculateFootballProbabilities } from '../core/stats/poisson.ts';
 import { calculateBasketballProbabilities } from '../core/stats/basketballModel.ts';
+import { calculateEmpiricalProbabilities } from '../core/stats/empiricalProbabilities.ts';
 
 test('1. Guardia de Muestra Mínima (Sample Guard)', async (t) => {
   await t.test('debe bloquear cálculos si la muestra es menor a 5 partidos', () => {
@@ -141,4 +142,28 @@ test('5. Modelo de Ritmo y Eficiencia (Baloncesto)', async (t) => {
   // El local es significativamente superior en rating y juega en casa -> Probabilidad alta
   assert.ok(result.homeWinProb > 60);
   assert.ok(result.expectedHomeScore > result.expectedAwayScore);
+});
+
+test('6. Probabilidades Empíricas Basadas en Rendimiento Real (calculateEmpiricalProbabilities)', async (t) => {
+  await t.test('debe calcular probabilidades empíricas que sumen exactamente el 100% en fútbol', () => {
+    const home = { matchesPlayed: 10, wins: 6, draws: 2, losses: 2, avgScored: 2.1, avgConceded: 0.9 };
+    const away = { matchesPlayed: 10, wins: 4, draws: 3, losses: 3, avgScored: 1.4, avgConceded: 1.2 };
+
+    const result = calculateEmpiricalProbabilities(home, away, 'football');
+    assert.equal(result.homeWinProb + (result.drawProb || 0) + result.awayWinProb, 100);
+    assert.equal(result.modelName, 'Rendimiento Oficial Temporada Actual');
+    assert.equal(result.expectedHomeScore, 2.1);
+    assert.equal(result.expectedAwayScore, 1.4);
+    assert.ok(result.homeWinProb > result.awayWinProb);
+  });
+
+  await t.test('debe calcular probabilidades en baloncesto sin empates sumando 100%', () => {
+    const home = { matchesPlayed: 15, wins: 11, losses: 4, avgScored: 115.5, avgConceded: 108.2 };
+    const away = { matchesPlayed: 15, wins: 8, losses: 7, avgScored: 110.1, avgConceded: 112.4 };
+
+    const result = calculateEmpiricalProbabilities(home, away, 'basketball');
+    assert.equal(result.homeWinProb + result.awayWinProb, 100);
+    assert.equal(result.drawProb, undefined);
+    assert.ok(result.homeWinProb > 50);
+  });
 });

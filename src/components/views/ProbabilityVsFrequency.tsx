@@ -204,7 +204,7 @@ export function ProbabilityVsFrequency({
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Cpu size={16} color={isSampleSufficient ? 'var(--color-secondary)' : 'var(--color-warning)'} aria-hidden="true" />
               <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>
-                Probabilidad Estimada (Modelo)
+                Probabilidad por Rendimiento Real (Temporada)
               </h3>
             </div>
             {isSampleSufficient ? (
@@ -229,7 +229,7 @@ export function ProbabilityVsFrequency({
           {isSampleSufficient ? (
             <>
               <p style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)', marginBottom: '1.25rem' }}>
-                Cálculo teórico aislando el potencial de ataque del local contra la defensa rival. Sí suma 100% al ser un reparto probabilístico.
+                Cálculo empírico directo basado en el balance de victorias, empates y derrotas de ambos clubes en sus partidos oficiales de la temporada actual.
               </p>
 
               {/* Cifras grandes de probabilidad */}
@@ -273,7 +273,7 @@ export function ProbabilityVsFrequency({
               {/* Marcador proyectado con denominación oficial correcta */}
               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.65rem 0.85rem', background: 'var(--color-surface-subtle)', borderRadius: 'var(--radius-sm)', marginBottom: '0.85rem', fontSize: '0.8125rem' }}>
                 <span style={{ color: 'var(--color-text-secondary)' }}>
-                  Marcador esperado ({isFootball ? 'Goles esperados del modelo' : 'Puntos esperados del modelo'}):
+                  Promedio de anotación verificado ({isFootball ? 'Goles/partido en temporada' : 'Puntos/partido en temporada'}):
                 </span>
                 <span style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>
                   {probabilities.expectedHomeScore} - {probabilities.expectedAwayScore}
@@ -320,7 +320,7 @@ export function ProbabilityVsFrequency({
             gap: '0.35rem',
           }}
         >
-          <span>Fuente: Modelo matemático ({probabilities.modelName})</span>
+          <span>Fuente: {probabilities.modelName}</span>
           <span>Actualizado: {lastUpdated}</span>
         </div>
       </Card>

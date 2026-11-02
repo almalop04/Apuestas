@@ -110,7 +110,7 @@ export function AiAnalysisCard({
                   Análisis IA y Cuotas Justas
                 </h3>
                 <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
-                  Generado con Gemini (Plan 100% Gratuito) y respaldado por modelos matemáticos
+                  Generado con Gemini (Plan 100% Gratuito) y basado en estadísticas oficiales de la temporada
                 </span>
               </div>
             </div>
@@ -130,7 +130,7 @@ export function AiAnalysisCard({
           </div>
 
           <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', lineHeight: 1.5, marginBottom: '1.25rem' }}>
-            Pulsa el botón para obtener una explicación clara en lenguaje natural de por qué el modelo otorga estas probabilidades, qué cuotas tendrían valor teórico y los riesgos que la estadística no puede predecir.
+            Pulsa el botón para obtener una explicación clara en lenguaje natural de por qué el balance de victorias y goles de ambos clubes otorgan estas probabilidades, qué cuotas tendrían valor teórico y los riesgos no contemplados.
           </p>
 
           <button

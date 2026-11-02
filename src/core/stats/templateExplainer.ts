@@ -44,7 +44,7 @@ export class TemplateExplainer {
     const favItem = [...primaryMarket.items].sort((a, b) => b.probModelo - a.probModelo)[0];
 
     // 1. Resumen
-    const resumen = `${analysis.homeTeamName} se enfrenta a ${analysis.awayTeamName}. El modelo estadístico (${matchDetail.probabilities.modelName}) otorga la mayor probabilidad a la opción "${favItem.selection}" con un ${favItem.probModelo}%, equivalente a una cuota justa teórica de ${favItem.cuotaJusta ?? 'Sin datos'}.`;
+    const resumen = `${analysis.homeTeamName} se enfrenta a ${analysis.awayTeamName}. El análisis basado en el rendimiento verificado de la temporada actual otorga la mayor probabilidad a la opción "${favItem.selection}" con un ${favItem.probModelo}%, equivalente a una cuota justa teórica de ${favItem.cuotaJusta ?? 'Sin datos'}.`;
 
     // 2. Por qué (Razones cuantitativas respaldadas)
     const porQue: string[] = [];
@@ -52,13 +52,13 @@ export class TemplateExplainer {
     const awayFreq = matchDetail.frequencies5.away;
 
     porQue.push(
-      `${analysis.homeTeamName} presenta una media de ${homeFreq.avgGoalsOrPointsScored} ${isFb ? 'goles anotados' : 'puntos anotados'} y ${homeFreq.avgGoalsOrPointsConceded} recibidos en sus últimos partidos.`
+      `${analysis.homeTeamName} presenta una media de ${homeFreq.avgGoalsOrPointsScored} ${isFb ? 'goles anotados' : 'puntos anotados'} y ${homeFreq.avgGoalsOrPointsConceded} recibidos por partido en la temporada.`
     );
     porQue.push(
-      `${analysis.awayTeamName} registra ${awayFreq.avgGoalsOrPointsScored} ${isFb ? 'goles a favor' : 'puntos a favor'} y ${awayFreq.avgGoalsOrPointsConceded} en contra.`
+      `${analysis.awayTeamName} registra ${awayFreq.avgGoalsOrPointsScored} ${isFb ? 'goles a favor' : 'puntos a favor'} y ${awayFreq.avgGoalsOrPointsConceded} en contra por partido en la temporada.`
     );
     porQue.push(
-      `El marcador teórico proyectado por el modelo es de ${matchDetail.probabilities.expectedHomeScore} a ${matchDetail.probabilities.expectedAwayScore}.`
+      `El promedio de anotación verificado de ambos clubes es de ${matchDetail.probabilities.expectedHomeScore} goles del local y ${matchDetail.probabilities.expectedAwayScore} del visitante.`
     );
 
     // 3. Mercados desglosados
@@ -67,11 +67,11 @@ export class TemplateExplainer {
 
       if (item.cuotaReal != null) {
         if (item.cuotaJusta != null && item.cuotaReal > item.cuotaJusta) {
-          lectura += ` La cuota real ofrecida (${item.cuotaReal}) supera la justa (${item.cuotaJusta}), reflejando un valor matemático teórico según el modelo.`;
+          lectura += ` La cuota real ofrecida (${item.cuotaReal}) supera la justa (${item.cuotaJusta}), reflejando un valor estadístico favorable según los partidos jugados.`;
         } else if (item.cuotaJusta != null && item.cuotaReal < item.cuotaJusta) {
           lectura += ` La cuota real (${item.cuotaReal}) está por debajo de la cuota justa (${item.cuotaJusta}), reduciendo el atractivo del pago.`;
         } else {
-          lectura += ` La cuota de mercado (${item.cuotaReal}) se alinea con la estimación teórica.`;
+          lectura += ` La cuota de mercado (${item.cuotaReal}) se alinea con el rendimiento histórico.`;
         }
       } else {
         lectura += ' Cuota real no disponible (Sin datos en la fuente de mercado).';
@@ -86,9 +86,9 @@ export class TemplateExplainer {
       };
     });
 
-    // 4. Riesgos y límites del modelo
+    // 4. Riesgos y factores no contemplados en la estadística
     const riesgos = [
-      'El modelo matemático no evalúa lesiones de última hora ni ausencias en el once titular.',
+      'Las estadísticas históricas no evalúan lesiones de última hora ni ausencias en el once titular.',
       'No se consideran factores motivacionales, fatiga por acumulación de calendario ni condiciones climáticas.',
       `Nivel de confianza ${analysis.confidence.level.toUpperCase()}: ${analysis.confidence.reason}`,
     ];

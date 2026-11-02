@@ -216,7 +216,7 @@ export function MatchCard({ match, windowSize = 5 }: MatchCardProps) {
             }}
           >
             <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--color-secondary)' }} />
-            Probabilidad Estimada (Modelo)
+            Probabilidad por Rendimiento Real
           </div>
           {isSampleOk ? (
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>
