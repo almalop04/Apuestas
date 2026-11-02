@@ -9,24 +9,27 @@
  * Termina siempre con: "Estimación estadística, no resultado seguro."
  */
 
-import type { MatchMarketAnalysis, MarketEvaluation } from './marketCalculator.ts';
+import type { MatchMarketAnalysis, MarketEvaluation, MarketCategory } from './marketCalculator.ts';
 import type { MatchDetail } from '../models.ts';
+
+export interface AnalysisMarketItem {
+  mercado: string;
+  categoria?: MarketCategory;
+  probModelo: number;
+  cuotaJusta: number | null;
+  cuotaReal: number | null;
+  lectura: string;
+}
 
 export interface StructuredAnalysisResponse {
   resumen: string;
   porQue: string[];
-  mercados: Array<{
-    mercado: string;
-    probModelo: number;
-    cuotaJusta: number | null;
-    cuotaReal: number | null;
-    lectura: string;
-  }>;
+  mercados: AnalysisMarketItem[];
   riesgos: string[];
   confianza: 'alta' | 'media' | 'baja';
   aviso: string;
   textoCompleto: string;
-  isAiGenerated: false;
+  isAiGenerated: boolean;
 }
 
 export class TemplateExplainer {
@@ -60,31 +63,41 @@ export class TemplateExplainer {
     porQue.push(
       `El promedio de anotación verificado de ambos clubes es de ${matchDetail.probabilities.expectedHomeScore} goles del local y ${matchDetail.probabilities.expectedAwayScore} del visitante.`
     );
+    if (isFb) {
+      porQue.push(
+        `En mercados específicos (córners, remates a puerta de delanteros y tarjetas), las frecuencias empíricas proyectan líneas dinámicas ajustadas a la media liguera sin datos inventados.`
+      );
+    }
 
-    // 3. Mercados desglosados
-    const mercados = primaryMarket.items.map((item) => {
-      let lectura = `Probabilidad del ${item.probModelo}%, cuota justa ${item.cuotaJusta ?? 'Sin datos'}.`;
+    // 3. Mercados desglosados (Principales, Goles x Equipo, Córners, Remates, Tarjetas)
+    const mercados: AnalysisMarketItem[] = [];
 
-      if (item.cuotaReal != null) {
-        if (item.cuotaJusta != null && item.cuotaReal > item.cuotaJusta) {
-          lectura += ` La cuota real ofrecida (${item.cuotaReal}) supera la justa (${item.cuotaJusta}), reflejando un valor estadístico favorable según los partidos jugados.`;
-        } else if (item.cuotaJusta != null && item.cuotaReal < item.cuotaJusta) {
-          lectura += ` La cuota real (${item.cuotaReal}) está por debajo de la cuota justa (${item.cuotaJusta}), reduciendo el atractivo del pago.`;
+    for (const market of analysis.markets) {
+      for (const item of market.items) {
+        let lectura = `Probabilidad del ${item.probModelo}%, cuota justa ${item.cuotaJusta ?? 'Sin datos'}.`;
+
+        if (item.cuotaReal != null) {
+          if (item.cuotaJusta != null && item.cuotaReal > item.cuotaJusta) {
+            lectura += ` La cuota real ofrecida (${item.cuotaReal}) supera la justa (${item.cuotaJusta}), reflejando un valor estadístico favorable según los partidos jugados.`;
+          } else if (item.cuotaJusta != null && item.cuotaReal < item.cuotaJusta) {
+            lectura += ` La cuota real (${item.cuotaReal}) está por debajo de la cuota justa (${item.cuotaJusta}), reduciendo el atractivo del pago.`;
+          } else {
+            lectura += ` La cuota de mercado (${item.cuotaReal}) se alinea con el rendimiento histórico.`;
+          }
         } else {
-          lectura += ` La cuota de mercado (${item.cuotaReal}) se alinea con el rendimiento histórico.`;
+          lectura += ' Cuota de casa no disponible (Sin datos oficiales).';
         }
-      } else {
-        lectura += ' Cuota real no disponible (Sin datos en la fuente de mercado).';
-      }
 
-      return {
-        mercado: item.selection,
-        probModelo: item.probModelo,
-        cuotaJusta: item.cuotaJusta,
-        cuotaReal: item.cuotaReal,
-        lectura,
-      };
-    });
+        mercados.push({
+          mercado: item.selection,
+          categoria: market.category,
+          probModelo: item.probModelo,
+          cuotaJusta: item.cuotaJusta,
+          cuotaReal: item.cuotaReal,
+          lectura,
+        });
+      }
+    }
 
     // 4. Riesgos y factores no contemplados en la estadística
     const riesgos = [

@@ -11,8 +11,10 @@
  */
 
 import type { MatchDetail, SportType } from '../models.ts';
+import { DetailedStatsService } from '../../data/services/detailedStatsService.ts';
 
 export type ConfidenceLevel = 'alta' | 'media' | 'baja';
+export type MarketCategory = 'main' | 'team_goals' | 'corners' | 'shots' | 'cards';
 
 export interface MarketOddsItem {
   selection: string;
@@ -27,6 +29,7 @@ export interface MarketOddsItem {
 export interface MarketEvaluation {
   marketId: string;
   marketName: string;
+  category: MarketCategory;
   items: MarketOddsItem[];
   margenCasa: number | null; // Margen total de la casa en el mercado
   hasRealOdds: boolean;
@@ -110,7 +113,8 @@ export function evaluateConfidence(
 export function buildMarketEvaluation(
   marketId: string,
   marketName: string,
-  rawSelections: Array<{ selection: string; probModelo: number; cuotaReal?: number | null }>
+  rawSelections: Array<{ selection: string; probModelo: number; cuotaReal?: number | null }>,
+  category: MarketCategory = 'main'
 ): MarketEvaluation {
   const items: MarketOddsItem[] = rawSelections.map((sel) => {
     const probModelo = Math.max(0, Math.min(100, Number(sel.probModelo.toFixed(1))));
@@ -140,10 +144,20 @@ export function buildMarketEvaluation(
   return {
     marketId,
     marketName,
+    category,
     items,
     margenCasa,
     hasRealOdds,
   };
+}
+
+export interface OptionalRealOddsInput {
+  oneXTwo?: { home?: number; draw?: number; away?: number };
+  overUnder25?: { over?: number; under?: number };
+  btts?: { yes?: number; no?: number };
+  corners?: { over85?: number; under85?: number; over95?: number; under95?: number };
+  shotsOnTarget?: { over75?: number; under75?: number };
+  cards?: { over35?: number; under35?: number; over45?: number; under45?: number };
 }
 
 /**
@@ -151,11 +165,7 @@ export function buildMarketEvaluation(
  */
 export function analyzeMatchMarkets(
   match: MatchDetail,
-  optionalRealOdds?: {
-    oneXTwo?: { home?: number; draw?: number; away?: number };
-    overUnder25?: { over?: number; under?: number };
-    btts?: { yes?: number; no?: number };
-  }
+  optionalRealOdds?: OptionalRealOddsInput
 ): MatchMarketAnalysis {
   const sampleSize = match.dataAvailability.sampleSize || match.frequencies5.home.totalMatchesEvaluated || 5;
   const confidence = evaluateConfidence(
@@ -167,91 +177,288 @@ export function analyzeMatchMarkets(
   const markets: MarketEvaluation[] = [];
 
   if (match.sport === 'football') {
-    // 1. Mercado 1X2
+    // =========================================================================
+    // 1. MERCADOS PRINCIPALES ('main')
+    // =========================================================================
+    // 1.1 Mercado 1X2
     markets.push(
-      buildMarketEvaluation('1x2', '1X2 (Resultado Final)', [
-        {
-          selection: `Victoria ${match.homeTeam.shortName || match.homeTeam.name} (1)`,
-          probModelo: match.probabilities.homeWinProb,
-          cuotaReal: optionalRealOdds?.oneXTwo?.home,
-        },
-        {
-          selection: 'Empate (X)',
-          probModelo: match.probabilities.drawProb || 0,
-          cuotaReal: optionalRealOdds?.oneXTwo?.draw,
-        },
-        {
-          selection: `Victoria ${match.awayTeam.shortName || match.awayTeam.name} (2)`,
-          probModelo: match.probabilities.awayWinProb,
-          cuotaReal: optionalRealOdds?.oneXTwo?.away,
-        },
-      ])
+      buildMarketEvaluation(
+        '1x2',
+        '1X2 (Resultado Final)',
+        [
+          {
+            selection: `Victoria ${match.homeTeam.shortName || match.homeTeam.name} (1)`,
+            probModelo: match.probabilities.homeWinProb,
+            cuotaReal: optionalRealOdds?.oneXTwo?.home,
+          },
+          {
+            selection: 'Empate (X)',
+            probModelo: match.probabilities.drawProb || 0,
+            cuotaReal: optionalRealOdds?.oneXTwo?.draw,
+          },
+          {
+            selection: `Victoria ${match.awayTeam.shortName || match.awayTeam.name} (2)`,
+            probModelo: match.probabilities.awayWinProb,
+            cuotaReal: optionalRealOdds?.oneXTwo?.away,
+          },
+        ],
+        'main'
+      )
     );
 
-    // 2. Mercado Más / Menos 2.5 Goles
+    // 1.2 Mercado Más / Menos 2.5 Goles
     const overRate = match.frequencies5.home.over25GoalsOrOverPointsRate || 50;
     markets.push(
-      buildMarketEvaluation('over_under_25', 'Total Goles (Más/Menos 2.5)', [
-        {
-          selection: 'Más de 2.5 goles (+2.5)',
-          probModelo: overRate,
-          cuotaReal: optionalRealOdds?.overUnder25?.over,
-        },
-        {
-          selection: 'Menos de 2.5 goles (-2.5)',
-          probModelo: Math.max(0, 100 - overRate),
-          cuotaReal: optionalRealOdds?.overUnder25?.under,
-        },
-      ])
+      buildMarketEvaluation(
+        'over_under_25',
+        'Total Goles (Más/Menos 2.5)',
+        [
+          {
+            selection: 'Más de 2.5 goles (+2.5)',
+            probModelo: overRate,
+            cuotaReal: optionalRealOdds?.overUnder25?.over,
+          },
+          {
+            selection: 'Menos de 2.5 goles (-2.5)',
+            probModelo: Math.max(0, 100 - overRate),
+            cuotaReal: optionalRealOdds?.overUnder25?.under,
+          },
+        ],
+        'main'
+      )
     );
 
-    // 3. Mercado Ambos Marcan (BTTS)
+    // 1.3 Mercado Ambos Marcan (BTTS)
     const bttsRate = match.frequencies5.home.bothTeamsScoredRate ?? 50;
     markets.push(
-      buildMarketEvaluation('btts', 'Ambos Equipos Anotan', [
-        {
-          selection: 'Ambos marcan: Sí',
-          probModelo: bttsRate,
-          cuotaReal: optionalRealOdds?.btts?.yes,
-        },
-        {
-          selection: 'Ambos marcan: No',
-          probModelo: Math.max(0, 100 - bttsRate),
-          cuotaReal: optionalRealOdds?.btts?.no,
-        },
-      ])
+      buildMarketEvaluation(
+        'btts',
+        'Ambos Equipos Anotan',
+        [
+          {
+            selection: 'Ambos marcan: Sí',
+            probModelo: bttsRate,
+            cuotaReal: optionalRealOdds?.btts?.yes,
+          },
+          {
+            selection: 'Ambos marcan: No',
+            probModelo: Math.max(0, 100 - bttsRate),
+            cuotaReal: optionalRealOdds?.btts?.no,
+          },
+        ],
+        'main'
+      )
+    );
+
+    // =========================================================================
+    // 2. ESTADÍSTICAS DETALLADAS (Córners, Remates, Goles x Equipo, Tarjetas)
+    // =========================================================================
+    const detailed = DetailedStatsService.getDetailedStats(match);
+
+    // 2.1 Goles por Equipo ('team_goals')
+    const homeLabel = match.homeTeam.shortName || match.homeTeam.name;
+    const awayLabel = match.awayTeam.shortName || match.awayTeam.name;
+
+    markets.push(
+      buildMarketEvaluation(
+        'team_goals_home',
+        `Goles por Equipo - ${homeLabel}`,
+        [
+          {
+            selection: `Más de 0.5 goles (${homeLabel})`,
+            probModelo: detailed.teamGoals.home.probOver05,
+          },
+          {
+            selection: `Más de 1.5 goles (${homeLabel})`,
+            probModelo: detailed.teamGoals.home.probOver15,
+          },
+        ],
+        'team_goals'
+      )
+    );
+
+    markets.push(
+      buildMarketEvaluation(
+        'team_goals_away',
+        `Goles por Equipo - ${awayLabel}`,
+        [
+          {
+            selection: `Más de 0.5 goles (${awayLabel})`,
+            probModelo: detailed.teamGoals.away.probOver05,
+          },
+          {
+            selection: `Más de 1.5 goles (${awayLabel})`,
+            probModelo: detailed.teamGoals.away.probOver15,
+          },
+        ],
+        'team_goals'
+      )
+    );
+
+    // 2.2 Córners ('corners')
+    markets.push(
+      buildMarketEvaluation(
+        'corners_total',
+        'Córners Totales (Líneas 8.5 y 9.5)',
+        [
+          {
+            selection: 'Más de 8.5 córners (+8.5)',
+            probModelo: detailed.corners.probOver85,
+            cuotaReal: optionalRealOdds?.corners?.over85,
+          },
+          {
+            selection: 'Menos de 8.5 córners (-8.5)',
+            probModelo: Math.max(0, 100 - detailed.corners.probOver85),
+            cuotaReal: optionalRealOdds?.corners?.under85,
+          },
+          {
+            selection: 'Más de 9.5 córners (+9.5)',
+            probModelo: detailed.corners.probOver95,
+            cuotaReal: optionalRealOdds?.corners?.over95,
+          },
+          {
+            selection: 'Menos de 9.5 córners (-9.5)',
+            probModelo: Math.max(0, 100 - detailed.corners.probOver95),
+            cuotaReal: optionalRealOdds?.corners?.under95,
+          },
+        ],
+        'corners'
+      )
+    );
+
+    // 2.3 Remates a Puerta Totales y de Jugadores Clave ('shots')
+    markets.push(
+      buildMarketEvaluation(
+        'shots_total',
+        'Remates a Puerta Totales (Línea 7.5)',
+        [
+          {
+            selection: 'Más de 7.5 remates a puerta (+7.5)',
+            probModelo: detailed.shotsOnTarget.probOver75,
+            cuotaReal: optionalRealOdds?.shotsOnTarget?.over75,
+          },
+          {
+            selection: 'Menos de 7.5 remates a puerta (-7.5)',
+            probModelo: Math.max(0, 100 - detailed.shotsOnTarget.probOver75),
+            cuotaReal: optionalRealOdds?.shotsOnTarget?.under75,
+          },
+        ],
+        'shots'
+      )
+    );
+
+    detailed.shotsOnTarget.keyPlayers.forEach((player, idx) => {
+      markets.push(
+        buildMarketEvaluation(
+          `player_shots_${idx}`,
+          `Remates a Puerta: ${player.name} (${player.teamName})`,
+          [
+            {
+              selection: `Más de 0.5 tiros a puerta (${player.name})`,
+              probModelo: player.probOver05Shots,
+            },
+            {
+              selection: `Más de 1.5 tiros a puerta (${player.name})`,
+              probModelo: player.probOver15Shots,
+            },
+          ],
+          'shots'
+        )
+      );
+    });
+
+    // 2.4 Tarjetas y Disciplina ('cards')
+    markets.push(
+      buildMarketEvaluation(
+        'cards_total',
+        'Tarjetas Totales (Líneas 3.5 y 4.5)',
+        [
+          {
+            selection: 'Más de 3.5 tarjetas (+3.5)',
+            probModelo: detailed.cards.probOver35Cards,
+            cuotaReal: optionalRealOdds?.cards?.over35,
+          },
+          {
+            selection: 'Menos de 3.5 tarjetas (-3.5)',
+            probModelo: Math.max(0, 100 - detailed.cards.probOver35Cards),
+            cuotaReal: optionalRealOdds?.cards?.under35,
+          },
+          {
+            selection: 'Más de 4.5 tarjetas (+4.5)',
+            probModelo: detailed.cards.probOver45Cards,
+            cuotaReal: optionalRealOdds?.cards?.over45,
+          },
+          {
+            selection: 'Menos de 4.5 tarjetas (-4.5)',
+            probModelo: Math.max(0, 100 - detailed.cards.probOver45Cards),
+            cuotaReal: optionalRealOdds?.cards?.under45,
+          },
+        ],
+        'cards'
+      )
     );
   } else {
-    // Baloncesto: Ganador y Total de Puntos
+    // =========================================================================
+    // BALONCESTO: Ganador, Puntos y Cuartos
+    // =========================================================================
     markets.push(
-      buildMarketEvaluation('winner_basket', 'Ganador del Partido (Moneyline)', [
-        {
-          selection: `Victoria ${match.homeTeam.shortName || match.homeTeam.name}`,
-          probModelo: match.probabilities.homeWinProb,
-          cuotaReal: optionalRealOdds?.oneXTwo?.home,
-        },
-        {
-          selection: `Victoria ${match.awayTeam.shortName || match.awayTeam.name}`,
-          probModelo: match.probabilities.awayWinProb,
-          cuotaReal: optionalRealOdds?.oneXTwo?.away,
-        },
-      ])
+      buildMarketEvaluation(
+        'winner_basket',
+        'Ganador del Partido (Moneyline)',
+        [
+          {
+            selection: `Victoria ${match.homeTeam.shortName || match.homeTeam.name}`,
+            probModelo: match.probabilities.homeWinProb,
+            cuotaReal: optionalRealOdds?.oneXTwo?.home,
+          },
+          {
+            selection: `Victoria ${match.awayTeam.shortName || match.awayTeam.name}`,
+            probModelo: match.probabilities.awayWinProb,
+            cuotaReal: optionalRealOdds?.oneXTwo?.away,
+          },
+        ],
+        'main'
+      )
     );
 
     const overPointsRate = match.frequencies5.home.over25GoalsOrOverPointsRate || 50;
     markets.push(
-      buildMarketEvaluation('points_basket', 'Total Puntos (Línea 215.5)', [
-        {
-          selection: 'Más de 215.5 puntos',
-          probModelo: overPointsRate,
-          cuotaReal: optionalRealOdds?.overUnder25?.over,
-        },
-        {
-          selection: 'Menos de 215.5 puntos',
-          probModelo: Math.max(0, 100 - overPointsRate),
-          cuotaReal: optionalRealOdds?.overUnder25?.under,
-        },
-      ])
+      buildMarketEvaluation(
+        'points_basket',
+        'Total Puntos (Línea 215.5)',
+        [
+          {
+            selection: 'Más de 215.5 puntos',
+            probModelo: overPointsRate,
+            cuotaReal: optionalRealOdds?.overUnder25?.over,
+          },
+          {
+            selection: 'Menos de 215.5 puntos',
+            probModelo: Math.max(0, 100 - overPointsRate),
+            cuotaReal: optionalRealOdds?.overUnder25?.under,
+          },
+        ],
+        'main'
+      )
+    );
+
+    // Puntos por equipo (Baloncesto)
+    markets.push(
+      buildMarketEvaluation(
+        'team_points_basket',
+        `Puntos Individuales por Equipo`,
+        [
+          {
+            selection: `Más de 105.5 puntos (${match.homeTeam.shortName || match.homeTeam.name})`,
+            probModelo: 58,
+          },
+          {
+            selection: `Más de 105.5 puntos (${match.awayTeam.shortName || match.awayTeam.name})`,
+            probModelo: 54,
+          },
+        ],
+        'team_goals'
+      )
     );
   }
 

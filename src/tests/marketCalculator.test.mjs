@@ -168,6 +168,37 @@ test('4. Análisis de Mercados con y sin Cuotas Reales', async (t) => {
     assert.equal(homeItem.diferenciaProb, 4.4);
     assert.ok(m1x2.margenCasa != null && m1x2.margenCasa > 0);
   });
+
+  await t.test('debe generar mercados detallados de corners, remates, tarjetas y goles por equipo', () => {
+    const analysis = analyzeMatchMarkets(dummyMatch);
+    
+    // Mercados de goles por equipo
+    const homeGoals = analysis.markets.find((m) => m.marketId === 'team_goals_home');
+    assert.ok(homeGoals, 'Debe incluir mercado de goles para el equipo local');
+    assert.equal(homeGoals.category, 'team_goals');
+
+    // Mercados de córners
+    const corners = analysis.markets.find((m) => m.marketId === 'corners_total');
+    assert.ok(corners, 'Debe incluir mercado de córners totales');
+    assert.equal(corners.category, 'corners');
+    assert.ok(corners.items.some((i) => i.selection.includes('8.5')));
+    assert.ok(corners.items.some((i) => i.selection.includes('9.5')));
+
+    // Mercados de remates a puerta
+    const shots = analysis.markets.find((m) => m.marketId === 'shots_total');
+    assert.ok(shots, 'Debe incluir mercado de remates a puerta totales');
+    assert.equal(shots.category, 'shots');
+
+    // Mercados de remates de delanteros clave
+    const playerShots = analysis.markets.filter((m) => m.marketId.startsWith('player_shots_'));
+    assert.ok(playerShots.length >= 2, 'Debe incluir remates de delanteros de ambos clubes');
+
+    // Mercados de tarjetas
+    const cards = analysis.markets.find((m) => m.marketId === 'cards_total');
+    assert.ok(cards, 'Debe incluir mercado de tarjetas totales');
+    assert.equal(cards.category, 'cards');
+    assert.ok(cards.items.some((i) => i.selection.includes('3.5')));
+  });
 });
 
 test('5. Explicador por Plantillas (Respaldo sin IA)', async (t) => {

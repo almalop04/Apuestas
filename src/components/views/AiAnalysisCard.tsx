@@ -38,6 +38,7 @@ export function AiAnalysisCard({
   const [generatedAt, setGeneratedAt] = useState<string | null>(null);
   const [fallbackReason, setFallbackReason] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<'all' | 'main' | 'corners' | 'shots' | 'cards'>('all');
 
   const fetchAnalysis = async (refresh: boolean = false) => {
     try {
@@ -285,14 +286,85 @@ export function AiAnalysisCard({
 
           {/* 3. Tabla de Mercados y Cuotas Justas vs Casas de Apuestas */}
           <div style={{ marginBottom: '1.25rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', flexWrap: 'wrap', gap: '0.4rem' }}>
-              <h4 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--color-text-primary)', margin: 0 }}>
-                Evaluación de Mercados: Cuota Justa vs Casas (Bet365 / Winamax)
-              </h4>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.4rem' }}>
+              <div>
+                <h4 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--color-text-primary)', margin: 0 }}>
+                  Evaluación de Mercados: Cuota Justa vs Casas (Bet365 / Winamax)
+                </h4>
+                <span style={{ fontSize: '0.6875rem', color: 'var(--color-text-muted)' }}>
+                  Incluye 1X2, goles por equipo, saques de esquina, remates a puerta de delanteros y tarjetas
+                </span>
+              </div>
               <span style={{ fontSize: '0.6875rem', color: 'var(--color-text-muted)' }}>
                 Referencias oficiales de mercado regulado
               </span>
             </div>
+
+            {/* Pestañas de Filtrado por Categoría */}
+            <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
+              {[
+                { id: 'all', label: '🌟 Todos', count: analysis.mercados.length },
+                {
+                  id: 'main',
+                  label: '⚽ 1X2 y Goles',
+                  count: analysis.mercados.filter((m) => m.categoria === 'main' || m.categoria === 'team_goals' || !m.categoria).length,
+                },
+                {
+                  id: 'corners',
+                  label: '🚩 Córners',
+                  count: analysis.mercados.filter((m) => m.categoria === 'corners').length,
+                },
+                {
+                  id: 'shots',
+                  label: '🎯 Remates a Puerta',
+                  count: analysis.mercados.filter((m) => m.categoria === 'shots').length,
+                },
+                {
+                  id: 'cards',
+                  label: '🟨 Tarjetas',
+                  count: analysis.mercados.filter((m) => m.categoria === 'cards').length,
+                },
+              ]
+                .filter((tab) => tab.count > 0 || tab.id === 'all')
+                .map((tab) => {
+                  const isActive = selectedCategory === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setSelectedCategory(tab.id as any)}
+                      style={{
+                        padding: '4px 10px',
+                        fontSize: '0.75rem',
+                        fontWeight: isActive ? 600 : 500,
+                        color: isActive ? '#fff' : 'var(--color-text-secondary)',
+                        background: isActive ? 'var(--color-primary)' : 'var(--color-surface-subtle)',
+                        border: isActive ? '1px solid var(--color-primary)' : '1px solid var(--color-border)',
+                        borderRadius: 'var(--radius-sm)',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.3rem',
+                      }}
+                    >
+                      <span>{tab.label}</span>
+                      <span
+                        style={{
+                          fontSize: '0.6875rem',
+                          opacity: isActive ? 0.9 : 0.6,
+                          background: isActive ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.15)',
+                          padding: '1px 5px',
+                          borderRadius: '8px',
+                        }}
+                      >
+                        {tab.count}
+                      </span>
+                    </button>
+                  );
+                })}
+            </div>
+
             <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
               <table
                 style={{
@@ -305,6 +377,7 @@ export function AiAnalysisCard({
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--color-border)', background: 'var(--color-surface-subtle)' }}>
                     <th style={{ padding: '0.6rem 0.75rem', color: 'var(--color-text-secondary)', fontWeight: 600 }}>Mercado / Opción</th>
+                    <th style={{ padding: '0.6rem 0.75rem', color: 'var(--color-text-secondary)', fontWeight: 600 }}>Tipo</th>
                     <th style={{ padding: '0.6rem 0.75rem', color: 'var(--color-text-secondary)', fontWeight: 600 }}>Prob. Modelo</th>
                     <th style={{ padding: '0.6rem 0.75rem', color: 'var(--color-secondary)', fontWeight: 600 }}>Cuota Justa</th>
                     <th style={{ padding: '0.6rem 0.75rem', color: 'var(--color-accent)', fontWeight: 600 }}>Cuota Real (Bet365 / Winamax)</th>
@@ -312,55 +385,89 @@ export function AiAnalysisCard({
                   </tr>
                 </thead>
                 <tbody>
-                  {analysis.mercados.map((m, idx) => (
-                    <tr
-                      key={idx}
-                      style={{
-                        borderBottom: '1px solid var(--color-border-subtle)',
-                        background: idx % 2 === 0 ? 'transparent' : 'rgba(255, 255, 255, 0.015)',
-                      }}
-                    >
-                      <td style={{ padding: '0.6rem 0.75rem', fontWeight: 500, color: 'var(--color-text-primary)' }}>
-                        {m.mercado}
-                      </td>
-                      <td style={{ padding: '0.6rem 0.75rem', fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>
-                        {m.probModelo}%
-                      </td>
-                      <td style={{ padding: '0.6rem 0.75rem', fontVariantNumeric: 'tabular-nums', fontWeight: 600, color: 'var(--color-secondary)' }}>
-                        {m.cuotaJusta != null ? m.cuotaJusta.toFixed(2) : 'Sin datos'}
-                      </td>
-                      <td style={{ padding: '0.6rem 0.75rem', fontVariantNumeric: 'tabular-nums' }}>
-                        {m.cuotaReal != null ? (
-                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
-                            <span style={{ fontWeight: 600, color: 'var(--color-accent)' }}>
-                              {m.cuotaReal.toFixed(2)}
+                  {analysis.mercados
+                    .filter((m) => {
+                      if (selectedCategory === 'all') return true;
+                      if (selectedCategory === 'main') return m.categoria === 'main' || m.categoria === 'team_goals' || !m.categoria;
+                      return m.categoria === selectedCategory;
+                    })
+                    .map((m, idx) => {
+                      const catBadge =
+                        m.categoria === 'corners'
+                          ? { label: 'Córners', color: '#38BDF8', bg: 'rgba(56, 189, 248, 0.12)' }
+                          : m.categoria === 'shots'
+                          ? { label: 'Remates', color: '#F472B6', bg: 'rgba(244, 114, 182, 0.12)' }
+                          : m.categoria === 'cards'
+                          ? { label: 'Tarjetas', color: '#FBBF24', bg: 'rgba(251, 191, 36, 0.12)' }
+                          : m.categoria === 'team_goals'
+                          ? { label: 'Gol Equipo', color: '#34D399', bg: 'rgba(52, 211, 153, 0.12)' }
+                          : { label: 'Principal', color: 'var(--color-text-muted)', bg: 'var(--color-surface-subtle)' };
+
+                      return (
+                        <tr
+                          key={idx}
+                          style={{
+                            borderBottom: '1px solid var(--color-border-subtle)',
+                            background: idx % 2 === 0 ? 'transparent' : 'rgba(255, 255, 255, 0.015)',
+                          }}
+                        >
+                          <td style={{ padding: '0.6rem 0.75rem', fontWeight: 500, color: 'var(--color-text-primary)' }}>
+                            {m.mercado}
+                          </td>
+                          <td style={{ padding: '0.6rem 0.75rem' }}>
+                            <span
+                              style={{
+                                fontSize: '0.6875rem',
+                                padding: '2px 6px',
+                                borderRadius: '4px',
+                                color: catBadge.color,
+                                background: catBadge.bg,
+                                fontWeight: 500,
+                                whiteSpace: 'nowrap',
+                              }}
+                            >
+                              {catBadge.label}
                             </span>
-                            {m.cuotaJusta != null && m.cuotaReal > m.cuotaJusta ? (
-                              <span
-                                style={{
-                                  fontSize: '0.625rem',
-                                  padding: '1px 5px',
-                                  borderRadius: '3px',
-                                  background: 'rgba(45, 212, 167, 0.15)',
-                                  color: 'var(--color-accent)',
-                                  fontWeight: 600,
-                                  border: '1px solid rgba(45, 212, 167, 0.3)',
-                                }}
-                                title="Cuota de la casa superior a la cuota justa matemática"
-                              >
-                                Valor Teórico
-                              </span>
-                            ) : null}
-                          </div>
-                        ) : (
-                          <span style={{ color: 'var(--color-text-muted)' }}>Sin datos</span>
-                        )}
-                      </td>
-                      <td style={{ padding: '0.6rem 0.75rem', color: 'var(--color-text-secondary)', fontSize: '0.75rem' }}>
-                        {m.lectura}
-                      </td>
-                    </tr>
-                  ))}
+                          </td>
+                          <td style={{ padding: '0.6rem 0.75rem', fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>
+                            {m.probModelo}%
+                          </td>
+                          <td style={{ padding: '0.6rem 0.75rem', fontVariantNumeric: 'tabular-nums', fontWeight: 600, color: 'var(--color-secondary)' }}>
+                            {m.cuotaJusta != null ? m.cuotaJusta.toFixed(2) : 'Sin datos'}
+                          </td>
+                          <td style={{ padding: '0.6rem 0.75rem', fontVariantNumeric: 'tabular-nums' }}>
+                            {m.cuotaReal != null ? (
+                              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                                <span style={{ fontWeight: 600, color: 'var(--color-accent)' }}>
+                                  {m.cuotaReal.toFixed(2)}
+                                </span>
+                                {m.cuotaJusta != null && m.cuotaReal > m.cuotaJusta ? (
+                                  <span
+                                    style={{
+                                      fontSize: '0.625rem',
+                                      padding: '1px 5px',
+                                      borderRadius: '3px',
+                                      background: 'rgba(45, 212, 167, 0.15)',
+                                      color: 'var(--color-accent)',
+                                      fontWeight: 600,
+                                      border: '1px solid rgba(45, 212, 167, 0.3)',
+                                    }}
+                                    title="Cuota de la casa superior a la cuota justa matemática"
+                                  >
+                                    Valor Teórico
+                                  </span>
+                                ) : null}
+                              </div>
+                            ) : (
+                              <span style={{ color: 'var(--color-text-muted)' }}>Sin datos</span>
+                            )}
+                          </td>
+                          <td style={{ padding: '0.6rem 0.75rem', color: 'var(--color-text-secondary)', fontSize: '0.75rem' }}>
+                            {m.lectura}
+                          </td>
+                        </tr>
+                      );
+                    })}
                 </tbody>
               </table>
             </div>

@@ -67,8 +67,8 @@ export class GeminiValidator {
       const textToScan = `${parsed.resumen} ${parsed.porQue.join(' ')}`;
       const foundNumbers = this.extractNumbers(textToScan);
 
-      // Números base que siempre son legítimos en el contexto (ventanas, redondeos estándar, nombre de Bet365, etc.)
-      const standardAllowed = new Set([0, 1, 2, 3, 5, 10, 100, 215.5, 2.5, 250, 365]);
+      // Números base que siempre son legítimos en el contexto (ventanas, redondeos estándar, líneas de gol/córners/tarjetas, nombre de Bet365, etc.)
+      const standardAllowed = new Set([0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4.5, 5, 7.5, 8.5, 9.5, 10, 100, 105.5, 215.5, 250, 365]);
       for (const num of allowedNumbers) {
         standardAllowed.add(num);
         standardAllowed.add(Math.round(num));
@@ -88,13 +88,26 @@ export class GeminiValidator {
       }
 
       // 3. Normalizar aviso y fijar confianza desde el código (inviolable)
-      const sanitizedMercados = parsed.mercados.map((m: any) => ({
-        mercado: String(m.mercado || 'Mercado'),
-        probModelo: Number(m.probModelo) || 0,
-        cuotaJusta: m.cuotaJusta != null && !isNaN(Number(m.cuotaJusta)) ? Number(m.cuotaJusta) : null,
-        cuotaReal: m.cuotaReal != null && !isNaN(Number(m.cuotaReal)) ? Number(m.cuotaReal) : null,
-        lectura: String(m.lectura || 'Sin lectura detallada.'),
-      }));
+      const sanitizedMercados = parsed.mercados.map((m: any) => {
+        let cat: any = m.categoria;
+        if (!cat) {
+          const lower = String(m.mercado || '').toLowerCase();
+          if (lower.includes('córner') || lower.includes('corner')) cat = 'corners';
+          else if (lower.includes('remate') || lower.includes('tiro')) cat = 'shots';
+          else if (lower.includes('tarjeta')) cat = 'cards';
+          else if (lower.includes('goles -') || lower.includes('goles por equipo') || lower.includes('puntos individuales')) cat = 'team_goals';
+          else cat = 'main';
+        }
+
+        return {
+          mercado: String(m.mercado || 'Mercado'),
+          categoria: cat,
+          probModelo: Number(m.probModelo) || 0,
+          cuotaJusta: m.cuotaJusta != null && !isNaN(Number(m.cuotaJusta)) ? Number(m.cuotaJusta) : null,
+          cuotaReal: m.cuotaReal != null && !isNaN(Number(m.cuotaReal)) ? Number(m.cuotaReal) : null,
+          lectura: String(m.lectura || 'Sin lectura detallada.'),
+        };
+      });
 
       let textoCompleto = `${parsed.resumen} ${parsed.porQue.join(' ')}`;
       if (!textoCompleto.endsWith(this.REQUIRED_DISCLAIMER)) {
