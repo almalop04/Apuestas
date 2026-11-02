@@ -16,8 +16,9 @@ export interface AnalysisMarketItem {
   mercado: string;
   categoria?: MarketCategory;
   probModelo: number;
-  cuotaJusta: number | null;
+  cuotaJusta?: number | null;
   cuotaReal: number | null;
+  casaApuesta?: 'Bet365' | 'Winamax';
   lectura: string;
 }
 
@@ -45,9 +46,10 @@ export class TemplateExplainer {
     const isFb = analysis.sport === 'football';
     const primaryMarket = analysis.markets[0]; // 1X2 o Ganador Baloncesto
     const favItem = [...primaryMarket.items].sort((a, b) => b.probModelo - a.probModelo)[0];
+    const favCasa = favItem.casaApuesta || 'Bet365';
 
-    // 1. Resumen
-    const resumen = `${analysis.homeTeamName} se enfrenta a ${analysis.awayTeamName}. El análisis basado en el rendimiento verificado de la temporada actual otorga la mayor probabilidad a la opción "${favItem.selection}" con un ${favItem.probModelo}%, equivalente a una cuota justa teórica de ${favItem.cuotaJusta ?? 'Sin datos'}.`;
+    // 1. Resumen (sin mención de cuota justa)
+    const resumen = `${analysis.homeTeamName} se enfrenta a ${analysis.awayTeamName}. El análisis basado en el rendimiento de la temporada actual sitúa como opción más factible "${favItem.selection}" con un ${favItem.probModelo}% de probabilidad estimada${favItem.cuotaReal ? `, a cuota ${favItem.cuotaReal} en ${favCasa}` : ''}.`;
 
     // 2. Por qué (Razones cuantitativas respaldadas)
     const porQue: string[] = [];
@@ -85,26 +87,21 @@ export class TemplateExplainer {
         market.marketId === 'winner_basket' ||
         bestItem.probModelo >= 48
       ) {
-        let lectura = `Opción más factible (${bestItem.probModelo}% de probabilidad estimada, cuota justa ${bestItem.cuotaJusta ?? 'Sin datos'}).`;
+        const casa = bestItem.casaApuesta || 'Bet365';
+        let lectura = `Opción más factible (${bestItem.probModelo}% de probabilidad estimada).`;
 
         if (bestItem.cuotaReal != null) {
-          if (bestItem.cuotaJusta != null && bestItem.cuotaReal > bestItem.cuotaJusta) {
-            lectura += ` La cuota real ofrecida (${bestItem.cuotaReal}) supera la cuota justa (${bestItem.cuotaJusta}), reflejando valor teórico favorable.`;
-          } else if (bestItem.cuotaJusta != null && bestItem.cuotaReal < bestItem.cuotaJusta) {
-            lectura += ` La cuota real (${bestItem.cuotaReal}) está algo ajustada frente a la justa (${bestItem.cuotaJusta}).`;
-          } else {
-            lectura += ` La cuota de mercado (${bestItem.cuotaReal}) se alinea con el rendimiento histórico.`;
-          }
+          lectura += ` Cuota oficial en ${casa}: ${bestItem.cuotaReal}.`;
         } else {
-          lectura += ' Cuota real no disponible (Sin datos en Bet365/Winamax).';
+          lectura += ' Cuota pendiente de publicación en las casas de apuestas.';
         }
 
         candidateItems.push({
           mercado: bestItem.selection,
           categoria: market.category,
           probModelo: bestItem.probModelo,
-          cuotaJusta: bestItem.cuotaJusta,
           cuotaReal: bestItem.cuotaReal,
+          casaApuesta: casa,
           lectura,
         });
       }
@@ -128,14 +125,14 @@ export class TemplateExplainer {
 
     if (analysis.hasAnyRealOdds) {
       parrafos.push(
-        `Al comparar con el mercado, ${primaryMarket.items
+        `En las casas de apuestas oficiales: ${primaryMarket.items
           .filter((i) => i.cuotaReal != null)
-          .map((i) => `${i.selection}: cuota justa ${i.cuotaJusta} vs cuota real ${i.cuotaReal}`)
+          .map((i) => `${i.selection}: cuota ${i.cuotaReal} en ${i.casaApuesta || 'Bet365'}`)
           .join('; ')}.`
       );
     } else {
       parrafos.push(
-        'Actualmente no se dispone de cuotas reales oficiales para este encuentro; la evaluación se fundamenta exclusivamente en la cuota justa teórica.'
+        'Actualmente las casas de apuestas no han abierto cuotas para este encuentro específico.'
       );
     }
 

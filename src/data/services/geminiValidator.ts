@@ -99,12 +99,20 @@ export class GeminiValidator {
           else cat = 'main';
         }
 
+        let casa: 'Bet365' | 'Winamax' = 'Bet365';
+        const rawCasa = String(m.casaApuesta || m.casa || '').toLowerCase();
+        if (rawCasa.includes('winamax') || cat === 'shots' || cat === 'team_goals') {
+          casa = 'Winamax';
+        } else {
+          casa = 'Bet365';
+        }
+
         return {
           mercado: String(m.mercado || 'Mercado'),
           categoria: cat,
           probModelo: Number(m.probModelo) || 0,
-          cuotaJusta: m.cuotaJusta != null && !isNaN(Number(m.cuotaJusta)) ? Number(m.cuotaJusta) : null,
           cuotaReal: m.cuotaReal != null && !isNaN(Number(m.cuotaReal)) ? Number(m.cuotaReal) : null,
+          casaApuesta: casa,
           lectura: String(m.lectura || 'Sin lectura detallada.'),
         };
       });

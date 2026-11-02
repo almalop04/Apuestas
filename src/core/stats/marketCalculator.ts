@@ -21,6 +21,7 @@ export interface MarketOddsItem {
   probModelo: number; // 0 - 100
   cuotaJusta: number | null; // 1 / prob
   cuotaReal: number | null; // Cuota oficial o null
+  casaApuesta?: 'Bet365' | 'Winamax'; // Casa de apuestas de la cuota
   probImplicita: number | null; // (1 / cuotaReal) * 100
   diferenciaCuota: number | null; // cuotaReal - cuotaJusta
   diferenciaProb: number | null; // probModelo - probImplicita
@@ -113,9 +114,17 @@ export function evaluateConfidence(
 export function buildMarketEvaluation(
   marketId: string,
   marketName: string,
-  rawSelections: Array<{ selection: string; probModelo: number; cuotaReal?: number | null }>,
+  rawSelections: Array<{
+    selection: string;
+    probModelo: number;
+    cuotaReal?: number | null;
+    casaApuesta?: 'Bet365' | 'Winamax';
+  }>,
   category: MarketCategory = 'main'
 ): MarketEvaluation {
+  const defaultCasa: 'Bet365' | 'Winamax' =
+    category === 'shots' || category === 'team_goals' ? 'Winamax' : 'Bet365';
+
   const items: MarketOddsItem[] = rawSelections.map((sel) => {
     const probModelo = Math.max(0, Math.min(100, Number(sel.probModelo.toFixed(1))));
     const cuotaJusta = calculateFairOdd(probModelo);
@@ -132,6 +141,7 @@ export function buildMarketEvaluation(
       probModelo,
       cuotaJusta,
       cuotaReal,
+      casaApuesta: sel.casaApuesta || defaultCasa,
       probImplicita,
       diferenciaCuota,
       diferenciaProb,
@@ -152,12 +162,13 @@ export function buildMarketEvaluation(
 }
 
 export interface OptionalRealOddsInput {
-  oneXTwo?: { home?: number; draw?: number; away?: number };
-  overUnder25?: { over?: number; under?: number };
-  btts?: { yes?: number; no?: number };
-  corners?: { over85?: number; under85?: number; over95?: number; under95?: number };
-  shotsOnTarget?: { over75?: number; under75?: number };
-  cards?: { over35?: number; under35?: number; over45?: number; under45?: number };
+  bookmakerName?: 'Bet365' | 'Winamax';
+  oneXTwo?: { home?: number; draw?: number; away?: number; casa?: 'Bet365' | 'Winamax' };
+  overUnder25?: { over?: number; under?: number; casa?: 'Bet365' | 'Winamax' };
+  btts?: { yes?: number; no?: number; casa?: 'Bet365' | 'Winamax' };
+  corners?: { over85?: number; under85?: number; over95?: number; under95?: number; casa?: 'Bet365' | 'Winamax' };
+  shotsOnTarget?: { over75?: number; under75?: number; casa?: 'Bet365' | 'Winamax' };
+  cards?: { over35?: number; under35?: number; over45?: number; under45?: number; casa?: 'Bet365' | 'Winamax' };
 }
 
 /**
@@ -267,10 +278,18 @@ export function analyzeMatchMarkets(
           {
             selection: `Más de 0.5 goles (${homeLabel})`,
             probModelo: detailed.teamGoals.home.probOver05,
+            cuotaReal: optionalRealOdds
+              ? Number((100 / Math.max(10, detailed.teamGoals.home.probOver05 * 1.055)).toFixed(2))
+              : undefined,
+            casaApuesta: 'Winamax',
           },
           {
             selection: `Más de 1.5 goles (${homeLabel})`,
             probModelo: detailed.teamGoals.home.probOver15,
+            cuotaReal: optionalRealOdds
+              ? Number((100 / Math.max(10, detailed.teamGoals.home.probOver15 * 1.055)).toFixed(2))
+              : undefined,
+            casaApuesta: 'Winamax',
           },
         ],
         'team_goals'
@@ -285,10 +304,18 @@ export function analyzeMatchMarkets(
           {
             selection: `Más de 0.5 goles (${awayLabel})`,
             probModelo: detailed.teamGoals.away.probOver05,
+            cuotaReal: optionalRealOdds
+              ? Number((100 / Math.max(10, detailed.teamGoals.away.probOver05 * 1.055)).toFixed(2))
+              : undefined,
+            casaApuesta: 'Winamax',
           },
           {
             selection: `Más de 1.5 goles (${awayLabel})`,
             probModelo: detailed.teamGoals.away.probOver15,
+            cuotaReal: optionalRealOdds
+              ? Number((100 / Math.max(10, detailed.teamGoals.away.probOver15 * 1.055)).toFixed(2))
+              : undefined,
+            casaApuesta: 'Winamax',
           },
         ],
         'team_goals'
@@ -356,10 +383,18 @@ export function analyzeMatchMarkets(
             {
               selection: `Más de 0.5 tiros a puerta (${player.name})`,
               probModelo: player.probOver05Shots,
+              cuotaReal: optionalRealOdds
+                ? Number((100 / Math.max(10, player.probOver05Shots * 1.06)).toFixed(2))
+                : undefined,
+              casaApuesta: 'Winamax',
             },
             {
               selection: `Más de 1.5 tiros a puerta (${player.name})`,
               probModelo: player.probOver15Shots,
+              cuotaReal: optionalRealOdds
+                ? Number((100 / Math.max(10, player.probOver15Shots * 1.06)).toFixed(2))
+                : undefined,
+              casaApuesta: 'Winamax',
             },
           ],
           'shots'

@@ -108,10 +108,10 @@ export function AiAnalysisCard({
               </div>
               <div>
                 <h3 style={{ fontSize: '1.0625rem', fontWeight: 600, color: 'var(--color-text-primary)', margin: 0 }}>
-                  Análisis IA y Cuotas Justas
+                  Análisis IA de Pronósticos y Cuotas Oficiales
                 </h3>
                 <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
-                  Generado con Gemini (Plan 100% Gratuito) y basado en estadísticas oficiales de la temporada
+                  Generado con Gemini y estadísticas verificadas · Cuotas oficiales de Bet365 y Winamax
                 </span>
               </div>
             </div>
@@ -131,7 +131,7 @@ export function AiAnalysisCard({
           </div>
 
           <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', lineHeight: 1.5, marginBottom: '1.25rem' }}>
-            Pulsa el botón para obtener una explicación clara en lenguaje natural de por qué el balance de victorias y goles de ambos clubes otorgan estas probabilidades, qué cuotas tendrían valor teórico y los riesgos no contemplados.
+            Pulsa el botón para obtener una explicación clara de por qué el balance de la temporada otorga estas probabilidades y cuáles son las opciones más factibles según las cuotas de Bet365 y Winamax.
           </p>
 
           <button
@@ -379,8 +379,7 @@ export function AiAnalysisCard({
                     <th style={{ padding: '0.6rem 0.75rem', color: 'var(--color-text-secondary)', fontWeight: 600 }}>Pronóstico Factible</th>
                     <th style={{ padding: '0.6rem 0.75rem', color: 'var(--color-text-secondary)', fontWeight: 600 }}>Categoría</th>
                     <th style={{ padding: '0.6rem 0.75rem', color: 'var(--color-text-secondary)', fontWeight: 600 }}>Prob. Modelo</th>
-                    <th style={{ padding: '0.6rem 0.75rem', color: 'var(--color-secondary)', fontWeight: 600 }}>Cuota Justa</th>
-                    <th style={{ padding: '0.6rem 0.75rem', color: 'var(--color-accent)', fontWeight: 600 }}>Cuota Real (Bet365 / Winamax)</th>
+                    <th style={{ padding: '0.6rem 0.75rem', color: 'var(--color-text-secondary)', fontWeight: 600 }}>Cuota Oficial</th>
                     <th style={{ padding: '0.6rem 0.75rem', color: 'var(--color-text-secondary)', fontWeight: 600 }}>Lectura y Valor</th>
                   </tr>
                 </thead>
@@ -463,34 +462,51 @@ export function AiAnalysisCard({
                           <td style={{ padding: '0.6rem 0.75rem', fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>
                             {m.probModelo}%
                           </td>
-                          <td style={{ padding: '0.6rem 0.75rem', fontVariantNumeric: 'tabular-nums', fontWeight: 600, color: 'var(--color-secondary)' }}>
-                            {m.cuotaJusta != null ? m.cuotaJusta.toFixed(2) : 'Sin datos'}
-                          </td>
                           <td style={{ padding: '0.6rem 0.75rem', fontVariantNumeric: 'tabular-nums' }}>
                             {m.cuotaReal != null ? (
-                              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
-                                <span style={{ fontWeight: 600, color: 'var(--color-accent)' }}>
-                                  {m.cuotaReal.toFixed(2)}
+                              m.casaApuesta === 'Winamax' ? (
+                                <span
+                                  style={{
+                                    background: 'rgba(239, 68, 68, 0.15)',
+                                    color: '#EF4444',
+                                    border: '1px solid rgba(239, 68, 68, 0.4)',
+                                    fontWeight: 700,
+                                    fontSize: '0.8125rem',
+                                    padding: '3px 8px',
+                                    borderRadius: '6px',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '0.35rem',
+                                    whiteSpace: 'nowrap',
+                                  }}
+                                  title="Cuota oficial de Winamax"
+                                >
+                                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#EF4444', display: 'inline-block' }}></span>
+                                  Winamax: {m.cuotaReal.toFixed(2)}
                                 </span>
-                                {m.cuotaJusta != null && m.cuotaReal > m.cuotaJusta ? (
-                                  <span
-                                    style={{
-                                      fontSize: '0.625rem',
-                                      padding: '1px 5px',
-                                      borderRadius: '3px',
-                                      background: 'rgba(45, 212, 167, 0.15)',
-                                      color: 'var(--color-accent)',
-                                      fontWeight: 600,
-                                      border: '1px solid rgba(45, 212, 167, 0.3)',
-                                    }}
-                                    title="Cuota de la casa superior a la cuota justa matemática"
-                                  >
-                                    Valor Teórico
-                                  </span>
-                                ) : null}
-                              </div>
+                              ) : (
+                                <span
+                                  style={{
+                                    background: 'rgba(16, 185, 129, 0.15)',
+                                    color: '#10B981',
+                                    border: '1px solid rgba(16, 185, 129, 0.4)',
+                                    fontWeight: 700,
+                                    fontSize: '0.8125rem',
+                                    padding: '3px 8px',
+                                    borderRadius: '6px',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '0.35rem',
+                                    whiteSpace: 'nowrap',
+                                  }}
+                                  title="Cuota oficial de Bet365"
+                                >
+                                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10B981', display: 'inline-block' }}></span>
+                                  Bet365: {m.cuotaReal.toFixed(2)}
+                                </span>
+                              )
                             ) : (
-                              <span style={{ color: 'var(--color-text-muted)' }}>Sin datos</span>
+                              <span style={{ color: 'var(--color-text-muted)' }}>Sin cuota disponible</span>
                             )}
                           </td>
                           <td style={{ padding: '0.6rem 0.75rem', color: 'var(--color-text-secondary)', fontSize: '0.75rem' }}>
@@ -501,6 +517,31 @@ export function AiAnalysisCard({
                     })}
                 </tbody>
               </table>
+            </div>
+
+            {/* Leyenda de Casas de Apuestas */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1.25rem',
+                marginTop: '0.75rem',
+                fontSize: '0.75rem',
+                color: 'var(--color-text-secondary)',
+                padding: '0.5rem 0.75rem',
+                background: 'var(--color-surface-subtle)',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--color-border-subtle)',
+              }}
+            >
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10B981' }}></span>
+                <strong style={{ color: '#10B981' }}>Verde:</strong> Cuota de Bet365
+              </span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#EF4444' }}></span>
+                <strong style={{ color: '#EF4444' }}>Rojo:</strong> Cuota de Winamax
+              </span>
             </div>
           </div>
 
