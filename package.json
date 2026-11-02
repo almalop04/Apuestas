@@ -7,13 +7,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "node --experimental-strip-types --test src/tests/stats.test.mjs src/tests/cache.test.mjs src/tests/marketCalculator.test.mjs"
+    "test": "node --experimental-strip-types --test src/tests/stats.test.mjs src/tests/cache.test.mjs src/tests/marketCalculator.test.mjs src/tests/geminiIntegration.test.mjs"
   },
   "dependencies": {
+    "@google/genai": "^2.32.0",
+    "lucide-react": "^0.475.0",
     "next": "^15.1.6",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "lucide-react": "^0.475.0"
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.13.1",
