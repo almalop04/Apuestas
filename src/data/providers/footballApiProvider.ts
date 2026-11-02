@@ -169,8 +169,8 @@ export class FootballApiProvider implements SportsDataProvider {
           probabilities: prob,
           headToHead: [],
           metrics: [
-            { id: 'xg', label: 'Goles Esperados (xG)', homeValue: 1.82, awayValue: 1.25, unit: 'xG', isHigherBetter: true },
-            { id: 'possession', label: 'Posesión media proyectada', homeValue: 54, awayValue: 46, unit: '%', isHigherBetter: true },
+            { id: 'xg', label: 'Goles esperados (modelo)', homeValue: 1.82, awayValue: 1.25, unit: 'goles', isHigherBetter: true },
+            { id: 'possession', label: 'Posesión media proyectada', homeValue: null, awayValue: null, unit: '%', isHigherBetter: true },
           ],
         };
       });

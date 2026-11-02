@@ -63,6 +63,9 @@ export interface HistoricalFrequencies {
   homeTeamWins: number;
   awayTeamWins: number;
   draws?: number; // Solo fútbol
+  winsCount?: number;
+  drawsCount?: number;
+  lossesCount?: number;
   
   // Frecuencias específicas
   over25GoalsOrOverPointsRate: number; // Porcentaje (0 - 100)
@@ -76,7 +79,7 @@ export interface EstimatedProbabilities {
   drawProb?: number;          // Porcentaje (0 - 100, opcional en fútbol)
   awayWinProb: number;       // Porcentaje (0 - 100)
   
-  expectedHomeScore: number; // Goles esperados (xG) o puntos esperados
+  expectedHomeScore: number; // Goles esperados (modelo) o puntos esperados
   expectedAwayScore: number;
   
   modelName: string;         // p. ej. "Poisson Bivariado con Ajuste Local"
@@ -87,8 +90,8 @@ export interface EstimatedProbabilities {
 export interface ComparisonMetric {
   id: string;
   label: string;
-  homeValue: number;
-  awayValue: number;
+  homeValue?: number | null;
+  awayValue?: number | null;
   unit?: string;
   isHigherBetter?: boolean;
 }

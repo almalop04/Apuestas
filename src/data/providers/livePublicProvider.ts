@@ -108,12 +108,15 @@ export class LivePublicSportsProvider implements SportsDataProvider {
         // 4. Actualizar barras comparativas con los datos reales
         match.metrics = isFootball
           ? [
-            { id: 'xg', label: 'Goles Esperados (xG)', homeValue: match.probabilities.expectedHomeScore, awayValue: match.probabilities.expectedAwayScore, unit: 'xG', isHigherBetter: true },
+            { id: 'xg', label: 'Goles esperados (modelo)', homeValue: match.probabilities.expectedHomeScore, awayValue: match.probabilities.expectedAwayScore, unit: 'goles', isHigherBetter: true },
             { id: 'scored', label: 'Media de goles anotados (10 p.)', homeValue: homeCalc.freq10.avgGoalsOrPointsScored, awayValue: awayCalc.freq10.avgGoalsOrPointsScored, unit: '', isHigherBetter: true },
             { id: 'conceded', label: 'Media de goles recibidos (10 p.)', homeValue: homeCalc.freq10.avgGoalsOrPointsConceded, awayValue: awayCalc.freq10.avgGoalsOrPointsConceded, unit: '', isHigherBetter: false },
             { id: 'over25', label: 'Tasa de partidos con >2.5 goles', homeValue: homeCalc.freq10.over25GoalsOrOverPointsRate, awayValue: awayCalc.freq10.over25GoalsOrOverPointsRate, unit: '%', isHigherBetter: true },
+            { id: 'possession', label: 'Posesión media proyectada', homeValue: null, awayValue: null, unit: '%', isHigherBetter: true },
+            { id: 'shots_target', label: 'Tiros a puerta / partido', homeValue: null, awayValue: null, unit: '', isHigherBetter: true },
           ]
           : [
+            { id: 'pts_model', label: 'Puntos esperados (modelo)', homeValue: match.probabilities.expectedHomeScore, awayValue: match.probabilities.expectedAwayScore, unit: 'pts', isHigherBetter: true },
             { id: 'scored', label: 'Media de puntos anotados (10 p.)', homeValue: homeCalc.freq10.avgGoalsOrPointsScored, awayValue: awayCalc.freq10.avgGoalsOrPointsScored, unit: 'pts', isHigherBetter: true },
             { id: 'conceded', label: 'Media de puntos recibidos (10 p.)', homeValue: homeCalc.freq10.avgGoalsOrPointsConceded, awayValue: awayCalc.freq10.avgGoalsOrPointsConceded, unit: 'pts', isHigherBetter: false },
             { id: 'over_pts', label: 'Tasa de partidos con >215.5 pts', homeValue: homeCalc.freq10.over25GoalsOrOverPointsRate, awayValue: awayCalc.freq10.over25GoalsOrOverPointsRate, unit: '%', isHigherBetter: true },
@@ -329,14 +332,11 @@ export class LivePublicSportsProvider implements SportsDataProvider {
               },
             },
             probabilities: prob,
-            headToHead: [
-              { date: 'Jornada anterior', competition: l.name, homeScore: 2, awayScore: 1, winner: 'home' },
-              { date: 'Temporada pasada', competition: l.name, homeScore: 1, awayScore: 1, winner: 'draw' },
-            ],
+            headToHead: [],
             metrics: [
-              { id: 'xg', label: 'Goles Esperados (xG)', homeValue: prob.expectedHomeScore, awayValue: prob.expectedAwayScore, unit: 'xG', isHigherBetter: true },
-              { id: 'possession', label: 'Posesión media proyectada', homeValue: 54.2, awayValue: 45.8, unit: '%', isHigherBetter: true },
-              { id: 'shots_target', label: 'Tiros a puerta esperados', homeValue: 6.2, awayValue: 4.8, unit: '', isHigherBetter: true },
+              { id: 'xg', label: 'Goles esperados (modelo)', homeValue: prob.expectedHomeScore, awayValue: prob.expectedAwayScore, unit: 'goles', isHigherBetter: true },
+              { id: 'possession', label: 'Posesión media proyectada', homeValue: null, awayValue: null, unit: '%', isHigherBetter: true },
+              { id: 'shots_target', label: 'Tiros a puerta esperados', homeValue: null, awayValue: null, unit: '', isHigherBetter: true },
             ],
           });
         }
@@ -486,9 +486,7 @@ export class LivePublicSportsProvider implements SportsDataProvider {
             },
           },
           probabilities: prob,
-          headToHead: [
-            { date: 'Temporada anterior', competition: 'NBA', homeScore: 118, awayScore: 112, winner: 'home' },
-          ],
+          headToHead: [],
           metrics: [
             { id: 'pace', label: 'Ritmo (Posesiones proyectadas)', homeValue: 101.5, awayValue: 99.8, unit: 'pos', isHigherBetter: true },
             { id: 'off_rtg', label: 'Eficiencia Ofensiva (Pts/100 pos)', homeValue: 118.2, awayValue: 113.6, unit: 'pts', isHigherBetter: true },

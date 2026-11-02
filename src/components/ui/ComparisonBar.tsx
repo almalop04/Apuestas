@@ -2,8 +2,8 @@ import React from 'react';
 
 interface ComparisonBarProps {
   label: string;
-  homeValue: number;
-  awayValue: number;
+  homeValue?: number | null;
+  awayValue?: number | null;
   homeTeamName: string;
   awayTeamName: string;
   unit?: string;
@@ -18,6 +18,35 @@ export function ComparisonBar({
   awayTeamName,
   unit = '',
 }: ComparisonBarProps) {
+  const hasData = homeValue != null && awayValue != null && !isNaN(homeValue) && !isNaN(awayValue);
+
+  if (!hasData) {
+    return (
+      <div className="comparison-row" style={{ opacity: 0.85 }}>
+        <div className="comparison-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span className="comparison-label">{label}</span>
+          <span
+            style={{
+              fontSize: '0.6875rem',
+              fontWeight: 500,
+              color: 'var(--color-text-muted)',
+              background: 'var(--color-surface-subtle)',
+              border: '1px solid var(--color-border)',
+              padding: '1px 6px',
+              borderRadius: 'var(--radius-sm)',
+            }}
+          >
+            Sin datos en la fuente
+          </span>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: 'var(--color-text-muted)', padding: '0.2rem 0' }}>
+          <span>{homeTeamName}: <em>Sin datos</em></span>
+          <span>{awayTeamName}: <em>Sin datos</em></span>
+        </div>
+      </div>
+    );
+  }
+
   const sum = Math.max(0.001, homeValue + awayValue);
   const homePercent = Math.round((homeValue / sum) * 100);
   const awayPercent = 100 - homePercent;

@@ -285,6 +285,8 @@ export default function MatchDetailPage() {
         isFootball={isFootball}
         isSampleSufficient={match.dataAvailability.isSampleSufficient}
         windowSize={windowSize}
+        sourceName={match.dataAvailability.sourceName}
+        lastUpdated={match.dataAvailability.lastUpdated}
       />
 
       {/* Barras Comparativas de Métricas Avanzadas */}
@@ -307,21 +309,91 @@ export default function MatchDetailPage() {
               />
             ))}
           </div>
+          <div
+            style={{
+              marginTop: '1.25rem',
+              paddingTop: '0.6rem',
+              borderTop: '1px solid var(--color-border-subtle)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              fontSize: '0.6875rem',
+              color: 'var(--color-text-muted)',
+              flexWrap: 'wrap',
+              gap: '0.35rem',
+            }}
+          >
+            <span>Fuente: {match.dataAvailability.sourceName}</span>
+            <span>Actualizado: {match.dataAvailability.lastUpdated}</span>
+          </div>
         </Card>
       )}
 
       {/* Historial Cara a Cara (Head to Head) */}
-      <Card style={{ marginBottom: '1.5rem' }}>
-        <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem', color: 'var(--color-text-primary)' }}>
-          Historial Directo (Cara a Cara)
-        </h3>
-        <DataTable
-          columns={h2hColumns}
-          data={match.headToHead || []}
-          caption="Encuentros previos directos entre ambos equipos"
-          emptyMessage="No hay registro de enfrentamientos directos previos entre ambos equipos."
-        />
-      </Card>
+      {(() => {
+        const realH2H = (match.headToHead || []).filter(
+          (row) =>
+            row.date &&
+            row.date !== '' &&
+            !row.date.toLowerCase().includes('temporada pasada') &&
+            !row.date.toLowerCase().includes('jornada anterior') &&
+            !row.date.toLowerCase().includes('temporada anterior')
+        );
+
+        return (
+          <Card style={{ marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+                Historial Directo (Cara a Cara)
+              </h3>
+              {realH2H.length === 0 && (
+                <Badge variant="nodata">Sin datos previos</Badge>
+              )}
+            </div>
+
+            {realH2H.length > 0 ? (
+              <DataTable
+                columns={h2hColumns}
+                data={realH2H}
+                caption="Encuentros previos directos entre ambos equipos"
+                emptyMessage="Sin datos de enfrentamientos directos previos registrados con fecha oficial."
+              />
+            ) : (
+              <div
+                style={{
+                  padding: '1.5rem',
+                  textAlign: 'center',
+                  background: 'var(--color-surface-subtle)',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px dashed var(--color-border)',
+                  color: 'var(--color-text-muted)',
+                  fontSize: '0.8125rem',
+                }}
+              >
+                Sin datos de enfrentamientos directos previos registrados con fecha oficial entre ambos equipos en esta competición.
+              </div>
+            )}
+
+            <div
+              style={{
+                marginTop: '1.25rem',
+                paddingTop: '0.6rem',
+                borderTop: '1px solid var(--color-border-subtle)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                fontSize: '0.6875rem',
+                color: 'var(--color-text-muted)',
+                flexWrap: 'wrap',
+                gap: '0.35rem',
+              }}
+            >
+              <span>Fuente: {match.dataAvailability.sourceName}</span>
+              <span>Actualizado: {match.dataAvailability.lastUpdated}</span>
+            </div>
+          </Card>
+        );
+      })()}
     </div>
   );
 }

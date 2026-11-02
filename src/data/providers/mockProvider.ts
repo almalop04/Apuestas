@@ -192,7 +192,7 @@ export class MockSportsProvider implements SportsDataProvider {
           { date: '2025-10-28', competition: 'LaLiga', homeScore: 1, awayScore: 2, winner: 'away' },
         ],
         metrics: [
-          { id: 'xg', label: 'Goles Esperados (xG)', homeValue: 2.14, awayValue: 1.88, unit: 'xG', isHigherBetter: true },
+          { id: 'xg', label: 'Goles esperados (modelo)', homeValue: 2.14, awayValue: 1.88, unit: 'goles', isHigherBetter: true },
           { id: 'possession', label: 'Posesión media', homeValue: 56.4, awayValue: 58.2, unit: '%', isHigherBetter: true },
           { id: 'shots_target', label: 'Tiros a puerta / partido', homeValue: 6.8, awayValue: 6.5, unit: '', isHigherBetter: true },
           { id: 'clean_sheets', label: 'Porterías a cero (%)', homeValue: 40, awayValue: 30, unit: '%', isHigherBetter: true },
@@ -281,7 +281,7 @@ export class MockSportsProvider implements SportsDataProvider {
           { date: '2025-10-08', competition: 'Premier League', homeScore: 1, awayScore: 0, winner: 'home' },
         ],
         metrics: [
-          { id: 'xg', label: 'Goles Esperados (xG)', homeValue: 2.31, awayValue: 1.62, unit: 'xG', isHigherBetter: true },
+          { id: 'xg', label: 'Goles esperados (modelo)', homeValue: 2.31, awayValue: 1.62, unit: 'goles', isHigherBetter: true },
           { id: 'possession', label: 'Posesión media', homeValue: 64.2, awayValue: 53.8, unit: '%', isHigherBetter: true },
           { id: 'shots_target', label: 'Tiros a puerta / partido', homeValue: 7.2, awayValue: 5.1, unit: '', isHigherBetter: true },
         ],
@@ -368,7 +368,7 @@ export class MockSportsProvider implements SportsDataProvider {
           { date: '2026-05-11', competition: 'LaLiga', homeScore: 1, awayScore: 1, winner: 'draw' },
         ],
         metrics: [
-          { id: 'xg', label: 'Goles Esperados (xG)', homeValue: 1.42, awayValue: 0.95, unit: 'xG', isHigherBetter: true },
+          { id: 'xg', label: 'Goles esperados (modelo)', homeValue: 1.42, awayValue: 0.95, unit: 'goles', isHigherBetter: true },
           { id: 'possession', label: 'Posesión media', homeValue: 54.1, awayValue: 42.6, unit: '%', isHigherBetter: true },
         ],
       },
@@ -399,7 +399,7 @@ export class MockSportsProvider implements SportsDataProvider {
           lastUpdated: 'Actualizado hace 50 min',
           sampleSize: 3,
           isSampleSufficient: false,
-          missingFields: ['Goles esperados (xG)', 'Posesión histórica', 'Tiros a puerta'],
+          missingFields: ['Goles esperados (modelo)', 'Posesión histórica', 'Tiros a puerta'],
         },
         frequencies5: {
           home: {

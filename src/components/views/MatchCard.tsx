@@ -194,10 +194,9 @@ export function MatchCard({ match, windowSize = 5 }: MatchCardProps) {
             <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--color-accent)' }} />
             Frecuencia Histórica ({windowSize} partidos)
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>
-            <span>Victorias Loc: <strong style={{ color: 'var(--color-text-primary)' }}>{freq.home.homeTeamWins}%</strong></span>
-            {isFootball && <span>Empates: <strong style={{ color: 'var(--color-text-primary)' }}>{freq.home.draws}%</strong></span>}
-            <span>Victorias Vis: <strong style={{ color: 'var(--color-text-primary)' }}>{freq.away.homeTeamWins}%</strong></span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: 'var(--color-text-secondary)', gap: '0.5rem' }}>
+            <span>{match.homeTeam.shortName || 'Local'}: <strong style={{ color: 'var(--color-accent)' }}>{freq.home.homeTeamWins}% vics</strong></span>
+            <span>{match.awayTeam.shortName || 'Visitante'}: <strong style={{ color: 'var(--color-accent)' }}>{freq.away.homeTeamWins}% vics</strong></span>
           </div>
         </div>
 

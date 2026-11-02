@@ -365,18 +365,15 @@ export class FlashscoreSportsProvider implements SportsDataProvider {
             },
           },
           probabilities: prob,
-          headToHead: [
-            { date: 'Jornada anterior', competition: currentTournament.name, homeScore: 2, awayScore: 1, winner: 'home' },
-            { date: 'Temporada pasada', competition: currentTournament.name, homeScore: 1, awayScore: 1, winner: 'draw' },
-          ],
+          headToHead: [],
           metrics: isFb
             ? [
-              { id: 'xg', label: 'Goles Esperados (xG)', homeValue: prob.expectedHomeScore, awayValue: prob.expectedAwayScore, unit: 'xG', isHigherBetter: true },
-              { id: 'possession', label: 'Posesión estimada', homeValue: 53.5, awayValue: 46.5, unit: '%', isHigherBetter: true },
-              { id: 'shots', label: 'Tiros proyectados', homeValue: 13.8, awayValue: 10.4, unit: '', isHigherBetter: true },
+              { id: 'xg', label: 'Goles esperados (modelo)', homeValue: prob.expectedHomeScore, awayValue: prob.expectedAwayScore, unit: 'goles', isHigherBetter: true },
+              { id: 'possession', label: 'Posesión media proyectada', homeValue: null, awayValue: null, unit: '%', isHigherBetter: true },
+              { id: 'shots', label: 'Tiros proyectados', homeValue: null, awayValue: null, unit: '', isHigherBetter: true },
             ]
             : [
-              { id: 'pace', label: 'Ritmo proyectado', homeValue: 101.5, awayValue: 99.8, unit: 'pos', isHigherBetter: true },
+              { id: 'pace', label: 'Puntos esperados (modelo)', homeValue: prob.expectedHomeScore, awayValue: prob.expectedAwayScore, unit: 'pts', isHigherBetter: true },
               { id: 'off_rtg', label: 'Eficiencia Ofensiva', homeValue: 118.2, awayValue: 113.6, unit: 'pts', isHigherBetter: true },
               { id: 'def_rtg', label: 'Eficiencia Defensiva', homeValue: 111.4, awayValue: 115.2, unit: 'pts', isHigherBetter: false },
             ],
