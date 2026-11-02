@@ -69,35 +69,51 @@ export class TemplateExplainer {
       );
     }
 
-    // 3. Mercados desglosados (Principales, Goles x Equipo, Córners, Remates, Tarjetas)
-    const mercados: AnalysisMarketItem[] = [];
+    // 3. Selección exclusiva de los pronósticos más factibles según los datos (4 a 6 selecciones top)
+    const candidateItems: AnalysisMarketItem[] = [];
 
+    // Para cada mercado, tomamos únicamente su selección con mayor probabilidad empírica
     for (const market of analysis.markets) {
-      for (const item of market.items) {
-        let lectura = `Probabilidad del ${item.probModelo}%, cuota justa ${item.cuotaJusta ?? 'Sin datos'}.`;
+      if (!market.items || market.items.length === 0) continue;
+      // Ordenar selecciones de este mercado por probabilidad descendente
+      const sortedItems = [...market.items].sort((a, b) => b.probModelo - a.probModelo);
+      const bestItem = sortedItems[0];
 
-        if (item.cuotaReal != null) {
-          if (item.cuotaJusta != null && item.cuotaReal > item.cuotaJusta) {
-            lectura += ` La cuota real ofrecida (${item.cuotaReal}) supera la justa (${item.cuotaJusta}), reflejando un valor estadístico favorable según los partidos jugados.`;
-          } else if (item.cuotaJusta != null && item.cuotaReal < item.cuotaJusta) {
-            lectura += ` La cuota real (${item.cuotaReal}) está por debajo de la cuota justa (${item.cuotaJusta}), reduciendo el atractivo del pago.`;
+      // Filtrar: si es 1X2 o Ganador, siempre tomamos el favorito; en otros mercados, solo si es una opción factible (prob >= 48%)
+      if (
+        market.marketId === '1x2' ||
+        market.marketId === 'winner_basket' ||
+        bestItem.probModelo >= 48
+      ) {
+        let lectura = `Opción más factible (${bestItem.probModelo}% de probabilidad estimada, cuota justa ${bestItem.cuotaJusta ?? 'Sin datos'}).`;
+
+        if (bestItem.cuotaReal != null) {
+          if (bestItem.cuotaJusta != null && bestItem.cuotaReal > bestItem.cuotaJusta) {
+            lectura += ` La cuota real ofrecida (${bestItem.cuotaReal}) supera la cuota justa (${bestItem.cuotaJusta}), reflejando valor teórico favorable.`;
+          } else if (bestItem.cuotaJusta != null && bestItem.cuotaReal < bestItem.cuotaJusta) {
+            lectura += ` La cuota real (${bestItem.cuotaReal}) está algo ajustada frente a la justa (${bestItem.cuotaJusta}).`;
           } else {
-            lectura += ` La cuota de mercado (${item.cuotaReal}) se alinea con el rendimiento histórico.`;
+            lectura += ` La cuota de mercado (${bestItem.cuotaReal}) se alinea con el rendimiento histórico.`;
           }
         } else {
-          lectura += ' Cuota de casa no disponible (Sin datos oficiales).';
+          lectura += ' Cuota real no disponible (Sin datos en Bet365/Winamax).';
         }
 
-        mercados.push({
-          mercado: item.selection,
+        candidateItems.push({
+          mercado: bestItem.selection,
           categoria: market.category,
-          probModelo: item.probModelo,
-          cuotaJusta: item.cuotaJusta,
-          cuotaReal: item.cuotaReal,
+          probModelo: bestItem.probModelo,
+          cuotaJusta: bestItem.cuotaJusta,
+          cuotaReal: bestItem.cuotaReal,
           lectura,
         });
       }
     }
+
+    // Ordenar para que encabecen las opciones con mayor probabilidad y tomar las 5-6 más factibles
+    const mercados = candidateItems
+      .sort((a, b) => b.probModelo - a.probModelo)
+      .slice(0, 6);
 
     // 4. Riesgos y factores no contemplados en la estadística
     const riesgos = [

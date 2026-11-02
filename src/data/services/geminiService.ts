@@ -30,7 +30,7 @@ export interface AiAnalysisResult {
 }
 
 export class GeminiService {
-  private static readonly SYSTEM_PROMPT = `Eres un analista deportivo estadístico dentro de una web personal. Recibirás en JSON los datos de UN partido: estadísticas de temporada, clasificaciones, mercados principales (1X2, Over/Under 2.5), córners, remates a puerta (totales y jugadores clave), goles por equipo y tarjetas, junto con cuotas reales de Bet365 / Winamax si existen. Tu trabajo es explicar y valorar, no inventar. REGLAS: usa SOLO los datos del JSON; si falta algo, escribe 'Sin datos' y no lo supongas; no uses conocimiento propio sobre plantillas o lesiones; no cambies ni recalcules los números; para cada mercado evalúa cuota justa vs cuota real y destaca opciones con valor estadístico positivo (tanto en ganador/goles como en córners, remates a puerta de delanteros o tarjetas); nunca digas 'apuesta segura' ni prometas ganancias; menciona lo que el modelo no considera como límite; en el array 'mercados' incluye las selecciones analizadas con los campos 'mercado', 'categoria' ('main'|'team_goals'|'corners'|'shots'|'cards'), 'probModelo', 'cuotaJusta', 'cuotaReal' y 'lectura'; español claro y sencillo, máximo 300 palabras. Termina siempre con: 'Estimación estadística, no resultado seguro.'`;
+  private static readonly SYSTEM_PROMPT = `Eres un analista deportivo estadístico dentro de una web personal. Recibirás en JSON los datos de UN partido: estadísticas de temporada, clasificaciones, mercados principales, córners, remates a puerta de delanteros clave, goles por equipo y tarjetas, junto con cuotas reales de Bet365 / Winamax si existen. Tu trabajo es explicar y valorar qué es lo más factible que suceda, no inventar. REGLAS: usa SOLO los datos del JSON; si falta algo, escribe 'Sin datos' y no lo supongas; no uses conocimiento propio sobre plantillas o lesiones; no cambies ni recalcules los números; en el array 'mercados', NO pongas todas las opciones contrarias ni todos los mercados posibles: selecciona ÚNICAMENTE entre 4 y 6 pronósticos que consideres MÁS FACTIBLES de que sucedan (aquellos con mayor probabilidad estadística y respaldo empírico: por ejemplo el ganador más probable, la línea de córners más factible, el remate a puerta del delantero con más opciones o la línea de tarjetas más factible). Para cada uno indica 'mercado', 'categoria' ('main'|'team_goals'|'corners'|'shots'|'cards'), 'probModelo', 'cuotaJusta', 'cuotaReal' y 'lectura' explicando por qué es la opción más factible y cómo compara con la cuota de la casa; nunca digas 'apuesta segura' ni prometas ganancias; menciona lo que el modelo no considera como límite; español claro y sencillo, máximo 300 palabras. Termina siempre con: 'Estimación estadística, no resultado seguro.'`;
 
   /**
    * Genera o recupera el análisis explicativo para un partido.
@@ -176,27 +176,27 @@ export class GeminiService {
       casasApuestasReferencia: realOdds ? 'Bet365 / Winamax' : 'Sin datos de cuotas de casas',
       estadisticasAvanzadasMercados: detailedStats
         ? {
-            corners: {
-              mediaEsperadaPartido: detailedStats.corners.totalExpected,
-              probabilidadMas85: `${detailedStats.corners.probOver85}%`,
-              probabilidadMas95: `${detailedStats.corners.probOver95}%`,
-            },
-            rematesAPuerta: {
-              mediaEsperadaPartido: detailedStats.shotsOnTarget.totalExpected,
-              probabilidadMas75: `${detailedStats.shotsOnTarget.probOver75}%`,
-              delanterosClave: detailedStats.shotsOnTarget.keyPlayers.map((p) => ({
-                jugador: p.name,
-                equipo: p.teamName,
-                mediaTirosPuerta: p.avgShotsOnTarget,
-                probabilidadAlMenosUnTiro: `${p.probOver05Shots}%`,
-              })),
-            },
-            tarjetas: {
-              mediaEsperadaPartido: detailedStats.cards.totalExpectedYellow,
-              probabilidadMas35: `${detailedStats.cards.probOver35Cards}%`,
-              probabilidadMas45: `${detailedStats.cards.probOver45Cards}%`,
-            },
-          }
+          corners: {
+            mediaEsperadaPartido: detailedStats.corners.totalExpected,
+            probabilidadMas85: `${detailedStats.corners.probOver85}%`,
+            probabilidadMas95: `${detailedStats.corners.probOver95}%`,
+          },
+          rematesAPuerta: {
+            mediaEsperadaPartido: detailedStats.shotsOnTarget.totalExpected,
+            probabilidadMas75: `${detailedStats.shotsOnTarget.probOver75}%`,
+            delanterosClave: detailedStats.shotsOnTarget.keyPlayers.map((p) => ({
+              jugador: p.name,
+              equipo: p.teamName,
+              mediaTirosPuerta: p.avgShotsOnTarget,
+              probabilidadAlMenosUnTiro: `${p.probOver05Shots}%`,
+            })),
+          },
+          tarjetas: {
+            mediaEsperadaPartido: detailedStats.cards.totalExpectedYellow,
+            probabilidadMas35: `${detailedStats.cards.probOver35Cards}%`,
+            probabilidadMas45: `${detailedStats.cards.probOver45Cards}%`,
+          },
+        }
         : null,
       rendimientoTemporadaCompeticion: {
         competicion: match.league.name,
@@ -249,7 +249,7 @@ export class GeminiService {
         const ai = new GoogleGenAI({ apiKey });
         const response = await ai.models.generateContent({
           model: modelName,
-          contents: `DATOS DEL PARTIDO, ESTADÍSTICAS DETALLADAS (CÓRNERS, REMATES A PUERTA, TARJETAS, GOLES POR EQUIPO) Y CUOTAS DE CASAS (Bet365 / Winamax) EN JSON:\n${JSON.stringify(payload, null, 2)}\n\nGenera el análisis en formato JSON estricto con los campos: resumen, porQue (lista), mercados (lista con mercado, categoria, probModelo, cuotaJusta, cuotaReal, lectura), riesgos (lista) y aviso. Analiza cómo comparan las cuotas frente a las cuotas justas en 1X2, córners, tiros a puerta de delanteros y tarjetas.`,
+          contents: `DATOS DEL PARTIDO, ESTADÍSTICAS DETALLADAS (CÓRNERS, REMATES A PUERTA, TARJETAS, GOLES POR EQUIPO) Y CUOTAS DE CASAS (Bet365 / Winamax) EN JSON:\n${JSON.stringify(payload, null, 2)}\n\nGenera el análisis en formato JSON estricto con los campos: resumen, porQue (lista), mercados (lista con mercado, categoria, probModelo, cuotaJusta, cuotaReal, lectura), riesgos (lista) y aviso. IMPORTANTE: En el array 'mercados' pon ÚNICAMENTE entre 4 y 6 pronósticos que la IA y las estadísticas consideren MÁS FACTIBLES de que sucedan (las opciones con mayor probabilidad y mayor respaldo empírico en ganador, córners, remates a puerta de delanteros o tarjetas; no pongas opciones poco probables ni opciones contrarias del mismo mercado).`,
           config: {
             systemInstruction: this.SYSTEM_PROMPT,
             temperature: 0.2,

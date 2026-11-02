@@ -288,22 +288,22 @@ export function AiAnalysisCard({
           <div style={{ marginBottom: '1.25rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.4rem' }}>
               <div>
-                <h4 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--color-text-primary)', margin: 0 }}>
-                  Evaluación de Mercados: Cuota Justa vs Casas (Bet365 / Winamax)
+                <h4 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--color-text-primary)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <span>🎯 Pronósticos Más Factibles según la IA</span>
                 </h4>
                 <span style={{ fontSize: '0.6875rem', color: 'var(--color-text-muted)' }}>
-                  Incluye 1X2, goles por equipo, saques de esquina, remates a puerta de delanteros y tarjetas
+                  Selección exclusiva de las opciones con mayor probabilidad de cumplirse (1X2, goles, córners, remates y tarjetas)
                 </span>
               </div>
               <span style={{ fontSize: '0.6875rem', color: 'var(--color-text-muted)' }}>
-                Referencias oficiales de mercado regulado
+                Referencias oficiales de Bet365 / Winamax
               </span>
             </div>
 
             {/* Pestañas de Filtrado por Categoría */}
             <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
               {[
-                { id: 'all', label: '🌟 Todos', count: analysis.mercados.length },
+                { id: 'all', label: '🌟 Todos los Factibles', count: analysis.mercados.length },
                 {
                   id: 'main',
                   label: '⚽ 1X2 y Goles',
@@ -316,7 +316,7 @@ export function AiAnalysisCard({
                 },
                 {
                   id: 'shots',
-                  label: '🎯 Remates a Puerta',
+                  label: '🎯 Remates Delanteros',
                   count: analysis.mercados.filter((m) => m.categoria === 'shots').length,
                 },
                 {
@@ -376,8 +376,8 @@ export function AiAnalysisCard({
               >
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--color-border)', background: 'var(--color-surface-subtle)' }}>
-                    <th style={{ padding: '0.6rem 0.75rem', color: 'var(--color-text-secondary)', fontWeight: 600 }}>Mercado / Opción</th>
-                    <th style={{ padding: '0.6rem 0.75rem', color: 'var(--color-text-secondary)', fontWeight: 600 }}>Tipo</th>
+                    <th style={{ padding: '0.6rem 0.75rem', color: 'var(--color-text-secondary)', fontWeight: 600 }}>Pronóstico Factible</th>
+                    <th style={{ padding: '0.6rem 0.75rem', color: 'var(--color-text-secondary)', fontWeight: 600 }}>Categoría</th>
                     <th style={{ padding: '0.6rem 0.75rem', color: 'var(--color-text-secondary)', fontWeight: 600 }}>Prob. Modelo</th>
                     <th style={{ padding: '0.6rem 0.75rem', color: 'var(--color-secondary)', fontWeight: 600 }}>Cuota Justa</th>
                     <th style={{ padding: '0.6rem 0.75rem', color: 'var(--color-accent)', fontWeight: 600 }}>Cuota Real (Bet365 / Winamax)</th>
@@ -412,7 +412,38 @@ export function AiAnalysisCard({
                           }}
                         >
                           <td style={{ padding: '0.6rem 0.75rem', fontWeight: 500, color: 'var(--color-text-primary)' }}>
-                            {m.mercado}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                              <span>{m.mercado}</span>
+                              {m.probModelo >= 65 ? (
+                                <span
+                                  style={{
+                                    fontSize: '0.625rem',
+                                    padding: '1px 5px',
+                                    borderRadius: '3px',
+                                    background: 'rgba(45, 212, 167, 0.15)',
+                                    color: 'var(--color-accent)',
+                                    fontWeight: 600,
+                                    border: '1px solid rgba(45, 212, 167, 0.3)',
+                                  }}
+                                >
+                                  ⭐ Muy Factible
+                                </span>
+                              ) : (
+                                <span
+                                  style={{
+                                    fontSize: '0.625rem',
+                                    padding: '1px 5px',
+                                    borderRadius: '3px',
+                                    background: 'rgba(56, 189, 248, 0.15)',
+                                    color: '#38BDF8',
+                                    fontWeight: 600,
+                                    border: '1px solid rgba(56, 189, 248, 0.3)',
+                                  }}
+                                >
+                                  ✓ Factible
+                                </span>
+                              )}
+                            </div>
                           </td>
                           <td style={{ padding: '0.6rem 0.75rem' }}>
                             <span
