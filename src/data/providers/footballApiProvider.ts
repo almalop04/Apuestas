@@ -104,6 +104,7 @@ export class FootballApiProvider implements SportsDataProvider {
           date: today,
           time: timeString,
           status: f.fixture.status.short === 'NS' ? 'scheduled' : f.fixture.status.short === 'FT' ? 'finished' : 'live',
+          kickoffTimestamp: f.fixture.timestamp ? f.fixture.timestamp * 1000 : new Date(f.fixture.date).getTime(),
           venue: f.fixture.venue?.name ? `${f.fixture.venue.name} (${f.fixture.venue.city})` : undefined,
           homeTeam,
           awayTeam,

@@ -16,6 +16,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { TeamLogo } from '@/components/ui/TeamLogo';
 import { CountryFlag } from '@/components/ui/CountryFlag';
 import { AiAnalysisCard } from '@/components/views/AiAnalysisCard';
+import { hasMatchStarted } from '@/core/utils/matchFilter';
 
 export default function MatchDetailPage() {
   const params = useParams();
@@ -180,6 +181,24 @@ export default function MatchDetailPage() {
               <span style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
                 <Clock size={13} aria-hidden="true" />
                 {match.time}
+              </span>
+            )}
+            {hasMatchStarted(match) && (
+              <span
+                style={{
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  color: '#EF4444',
+                  background: 'rgba(239, 68, 68, 0.12)',
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                  padding: '2px 8px',
+                  borderRadius: 'var(--radius-sm)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                }}
+              >
+                <span>🔒</span> Partido Comenzado · Apuestas Cerradas
               </span>
             )}
           </div>

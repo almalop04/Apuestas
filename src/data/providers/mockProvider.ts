@@ -17,6 +17,13 @@ import type { MatchDetail, SportType, Team } from '../../core/models.ts';
 import { calculateFootballProbabilities } from '../../core/stats/poisson.ts';
 import { calculateBasketballProbabilities } from '../../core/stats/basketballModel.ts';
 
+function toKickoffTimestamp(dateStr: string, timeStr: string): number {
+  const [hh, mm] = timeStr.split(':').map(Number);
+  const parts = dateStr.split('-').map(Number);
+  const d = new Date(parts[0], parts[1] - 1, parts[2], hh || 0, mm || 0, 0, 0);
+  return d.getTime();
+}
+
 export class MockSportsProvider implements SportsDataProvider {
   readonly providerName = 'Simulador Analítico Oficial (Alta Fidelidad)';
 
@@ -115,6 +122,7 @@ export class MockSportsProvider implements SportsDataProvider {
         date: today,
         time: '21:00',
         status: 'scheduled',
+        kickoffTimestamp: toKickoffTimestamp(today, '21:00'),
         venue: 'Estadio Santiago Bernabéu (Madrid)',
         homeTeam: {
           id: 'rmadrid',
@@ -205,6 +213,7 @@ export class MockSportsProvider implements SportsDataProvider {
         date: today,
         time: '18:30',
         status: 'scheduled',
+        kickoffTimestamp: toKickoffTimestamp(today, '18:30'),
         venue: 'Etihad Stadium (Manchester)',
         homeTeam: {
           id: 'mancity',
@@ -293,6 +302,7 @@ export class MockSportsProvider implements SportsDataProvider {
         date: today,
         time: '19:00',
         status: 'scheduled',
+        kickoffTimestamp: toKickoffTimestamp(today, '19:00'),
         venue: 'Estadio Montilivi (Girona)',
         homeTeam: {
           id: 'girona',
@@ -379,6 +389,7 @@ export class MockSportsProvider implements SportsDataProvider {
         date: today,
         time: '20:00',
         status: 'scheduled',
+        kickoffTimestamp: toKickoffTimestamp(today, '20:00'),
         venue: 'Estadio San Mamés (Bilbao)',
         homeTeam: {
           id: 'athletic',
@@ -489,6 +500,7 @@ export class MockSportsProvider implements SportsDataProvider {
         date: today,
         time: '01:30',
         status: 'scheduled',
+        kickoffTimestamp: toKickoffTimestamp(today, '01:30'),
         venue: 'TD Garden (Boston)',
         homeTeam: {
           id: 'celtics',
@@ -570,6 +582,7 @@ export class MockSportsProvider implements SportsDataProvider {
         date: today,
         time: '20:45',
         status: 'scheduled',
+        kickoffTimestamp: toKickoffTimestamp(today, '20:45'),
         venue: 'WiZink Center (Madrid)',
         homeTeam: {
           id: 'rmadrid_b',

@@ -181,10 +181,10 @@ export class RealOddsService {
                 overUnder25:
                   overOdd && underOdd
                     ? {
-                        over: overOdd,
-                        under: underOdd,
-                        casa: 'Winamax',
-                      }
+                      over: overOdd,
+                      under: underOdd,
+                      casa: 'Winamax',
+                    }
                     : undefined,
                 corners: {
                   over85: 1.80,

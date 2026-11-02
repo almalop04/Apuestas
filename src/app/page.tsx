@@ -8,6 +8,7 @@ import { MatchCard } from '@/components/views/MatchCard';
 import { CountryFlag } from '@/components/ui/CountryFlag';
 import { CustomLeagueDropdown, type CountryGroupItem } from '@/components/ui/CustomLeagueDropdown';
 import { DateNavigator } from '@/components/ui/DateNavigator';
+import { filterBettableMatches } from '@/core/utils/matchFilter';
 
 interface LeagueGroup {
   leagueId: string;
@@ -44,6 +45,20 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
+  const [currentTimeMs, setCurrentTimeMs] = useState<number>(() => Date.now());
+
+  // Actualización periódica en vivo cada 10s: elimina partidos de la pantalla en cuanto llega su hora de inicio
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTimeMs(Date.now());
+    }, 10000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Filtrado reactivo: excluye inmediatamente partidos ya comenzados o finalizados para apuestas pre-partido
+  const bettableMatches = useMemo(() => {
+    return filterBettableMatches(matches, currentTimeMs);
+  }, [matches, currentTimeMs]);
 
   const toggleGroup = (leagueId: string) => {
     setCollapsedGroups((prev) => ({
@@ -143,7 +158,7 @@ export default function DashboardPage() {
   const footballCountryGroups: CountryGroupItem[] = useMemo(() => {
     const counts: Record<string, number> = {};
     if (sport === 'football') {
-      for (const m of matches) {
+      for (const m of bettableMatches) {
         let lid = m.league.id;
         if (lid === 'laliga') lid = 'esp.1';
         else if (lid === 'premier') lid = 'eng.1';
@@ -222,13 +237,13 @@ export default function DashboardPage() {
         ],
       },
     ];
-  }, [matches, sport]);
+  }, [bettableMatches, sport]);
 
   // Grupos de Baloncesto organizados por país/ámbito con conteos en tiempo real
   const basketballCountryGroups: CountryGroupItem[] = useMemo(() => {
     const counts: Record<string, number> = {};
     if (sport === 'basketball') {
-      for (const m of matches) {
+      for (const m of bettableMatches) {
         counts[m.league.id] = (counts[m.league.id] || 0) + 1;
       }
     }
@@ -260,14 +275,14 @@ export default function DashboardPage() {
         ],
       },
     ];
-  }, [matches, sport]);
+  }, [bettableMatches, sport]);
 
   // Filtrar los partidos según la liga seleccionada
   const filteredMatches = useMemo(() => {
     if (selectedLeague === 'all') {
-      return matches;
+      return bettableMatches;
     }
-    return matches.filter((m) => {
+    return bettableMatches.filter((m) => {
       if (m.league.id === selectedLeague) return true;
       if (sport === 'football') {
         if (selectedLeague === 'esp.1' && (m.league.id === 'laliga' || m.league.id === 'esp.1')) return true;
@@ -277,7 +292,7 @@ export default function DashboardPage() {
       }
       return false;
     });
-  }, [matches, sport, selectedLeague]);
+  }, [bettableMatches, sport, selectedLeague]);
 
   const activeLeagueInfo = useMemo(() => {
     if (selectedLeague === 'all') return null;
@@ -439,7 +454,7 @@ export default function DashboardPage() {
                 if (sport !== 'football') handleSportChange('football');
                 setSelectedLeague(id);
               }}
-              totalSportMatches={sport === 'football' ? matches.length : 0}
+              totalSportMatches={sport === 'football' ? bettableMatches.length : 0}
             />
           </div>
 
@@ -494,7 +509,7 @@ export default function DashboardPage() {
                 if (sport !== 'basketball') handleSportChange('basketball');
                 setSelectedLeague(id);
               }}
-              totalSportMatches={sport === 'basketball' ? matches.length : 0}
+              totalSportMatches={sport === 'basketball' ? bettableMatches.length : 0}
             />
           </div>
 
@@ -630,8 +645,24 @@ export default function DashboardPage() {
                   fontVariantNumeric: 'tabular-nums',
                 }}
               >
-                {filteredMatches.length} {filteredMatches.length === 1 ? 'encuentro' : 'encuentros'}
+                {filteredMatches.length} {filteredMatches.length === 1 ? 'partido para apostar' : 'partidos para apostar'}
               </span>
+              {matches.length > bettableMatches.length && (
+                <span
+                  style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 500,
+                    color: 'var(--color-text-muted)',
+                    background: 'var(--color-surface-subtle)',
+                    border: '1px solid var(--color-border-subtle)',
+                    padding: '0.35rem 0.65rem',
+                    borderRadius: 'var(--radius-sm)',
+                  }}
+                  title="Los partidos que ya han comenzado o finalizado se retiran de la pantalla porque ya no se pueden realizar apuestas pre-partido."
+                >
+                  🔒 {matches.length - bettableMatches.length} ya comenzados (retirados)
+                </span>
+              )}
             </div>
           </div>
 
@@ -695,16 +726,56 @@ export default function DashboardPage() {
             >
               <CircleDot size={32} color="var(--color-text-muted)" style={{ margin: '0 auto 0.75rem' }} aria-hidden="true" />
               <h2 style={{ fontSize: '1.125rem', fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: '0.5rem' }}>
-                Sin partidos programados para hoy
+                Sin partidos programados para esta fecha
               </h2>
               <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
-                No hay encuentros agendados en la jornada actual para {sport === 'football' ? 'fútbol' : 'baloncesto'}.
+                No hay encuentros agendados en el calendario oficial para {sport === 'football' ? 'fútbol' : 'baloncesto'}.
               </p>
             </div>
           )}
 
-          {/* ESTADO 4: VACÍO POR FILTRO DE LIGA (LA LIGA SELECCIONADA NO JUEGA HOY) */}
-          {!loading && !error && matches.length > 0 && filteredMatches.length === 0 && (
+          {/* ESTADO 3B: TODOS LOS PARTIDOS YA HAN COMENZADO O FINALIZADO */}
+          {!loading && !error && matches.length > 0 && bettableMatches.length === 0 && (
+            <div
+              style={{
+                background: 'var(--color-surface)',
+                border: '1px dashed var(--color-border)',
+                borderRadius: 'var(--radius-lg)',
+                padding: '3rem 1.5rem',
+                textAlign: 'center',
+              }}
+            >
+              <CircleDot size={32} color="var(--color-warning)" style={{ margin: '0 auto 0.75rem' }} aria-hidden="true" />
+              <h2 style={{ fontSize: '1.125rem', fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: '0.5rem' }}>
+                Todos los partidos de hoy ya han comenzado
+              </h2>
+              <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', maxWidth: '520px', margin: '0 auto 1.25rem', lineHeight: 1.5 }}>
+                Los {matches.length} partidos programados para hoy ya están en juego o han concluido. Como las casas de apuestas (Bet365 / Winamax) cierran las apuestas pre-partido una vez comienza el encuentro, se han retirado de la pantalla.
+              </p>
+              <button
+                type="button"
+                onClick={() => setDayOffset((prev) => prev + 1)}
+                style={{
+                  padding: '0.6rem 1.4rem',
+                  background: 'var(--color-primary)',
+                  border: 'none',
+                  borderRadius: 'var(--radius-md)',
+                  color: '#0D1117',
+                  fontWeight: 600,
+                  fontSize: '0.875rem',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                }}
+              >
+                <span>📅 Ver partidos de mañana</span>
+              </button>
+            </div>
+          )}
+
+          {/* ESTADO 4: VACÍO POR FILTRO DE LIGA (LA LIGA SELECCIONADA YA COMENZÓ O NO JUEGA HOY) */}
+          {!loading && !error && bettableMatches.length > 0 && filteredMatches.length === 0 && (
             <div
               style={{
                 background: 'var(--color-surface)',
@@ -716,10 +787,10 @@ export default function DashboardPage() {
             >
               <Trophy size={32} color="var(--color-text-muted)" style={{ margin: '0 auto 0.75rem' }} aria-hidden="true" />
               <h2 style={{ fontSize: '1.125rem', fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: '0.5rem' }}>
-                Sin partidos hoy para {activeLeagueInfo?.name}
+                Sin partidos pendientes para {activeLeagueInfo?.name}
               </h2>
               <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', maxWidth: '440px', margin: '0 auto 1.25rem' }}>
-                Esta competición no tiene encuentros programados en la fecha de hoy ({activeLeagueInfo?.round || 'Jornada actual'}).
+                Los encuentros de esta competición para hoy ya han comenzado o no hay partidos pendientes programados.
               </p>
               <button
                 type="button"

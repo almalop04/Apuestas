@@ -128,6 +128,7 @@ export interface MatchDetail {
   date: string;              // Fecha (YYYY-MM-DD)
   time: string;              // Hora (HH:mm)
   status: MatchStatus;
+  kickoffTimestamp?: number; // Timestamp Unix en milisegundos del inicio del encuentro
   venue?: string;
   externalUrl?: string;      // Enlace oficial de verificación (p. ej. Flashscore.es)
   homeTeam: Team;

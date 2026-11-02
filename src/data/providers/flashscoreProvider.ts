@@ -300,6 +300,7 @@ export class FlashscoreSportsProvider implements SportsDataProvider {
           date: dateStr,
           time: timeStr,
           status,
+          kickoffTimestamp: timestampSec > 0 ? timestampSec * 1000 : dateObj.getTime(),
           externalUrl: `https://www.flashscore.es/partido/${fsId}/`,
           homeTeam,
           awayTeam,
