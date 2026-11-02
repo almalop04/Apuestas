@@ -1,5 +1,5 @@
 import React from 'react';
-import { HelpCircle, AlertTriangle, TrendingUp, Cpu, Database } from 'lucide-react';
+import { TrendingUp, Cpu, AlertTriangle } from 'lucide-react';
 import type { HistoricalFrequencies, EstimatedProbabilities } from '@/core/models';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
@@ -14,7 +14,7 @@ interface ProbabilityVsFrequencyProps {
   awayTeamName: string;
   isFootball: boolean;
   isSampleSufficient: boolean;
-  windowSize: 5 | 10;
+  competitionName?: string;
   sourceName?: string;
   lastUpdated?: string;
 }
@@ -26,12 +26,14 @@ export function ProbabilityVsFrequency({
   awayTeamName,
   isFootball,
   isSampleSufficient,
-  windowSize,
-  sourceName = 'Feed Oficial en Vivo',
+  competitionName = 'Competición Oficial',
+  sourceName = 'Clasificación Oficial Temporada Actual',
   lastUpdated = 'En tiempo real',
 }: ProbabilityVsFrequencyProps) {
-  const homeSampleSize = frequencies.home.totalMatchesEvaluated || windowSize;
-  const awaySampleSize = frequencies.away.totalMatchesEvaluated || windowSize;
+  const homeSampleSize = frequencies.home.totalMatchesEvaluated || frequencies.home.sampleSize || 0;
+  const awaySampleSize = frequencies.away.totalMatchesEvaluated || frequencies.away.sampleSize || 0;
+
+  const hasData = homeSampleSize > 0 || awaySampleSize > 0;
 
   const homeWins = frequencies.home.winsCount ?? Math.round((frequencies.home.homeTeamWins / 100) * homeSampleSize);
   const homeDraws = frequencies.home.drawsCount ?? Math.round(((frequencies.home.draws || 0) / 100) * homeSampleSize);
@@ -44,7 +46,7 @@ export function ProbabilityVsFrequency({
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem', marginBottom: '1.5rem' }}>
       {/* =========================================================================
-          BLOQUE 1: FRECUENCIA HISTÓRICA (VERDE ESMERALDA #2DD4A7)
+          BLOQUE 1: RENDIMIENTO EN LA TEMPORADA ACTUAL (VERDE ESMERALDA #2DD4A7)
           ========================================================================= */}
       <Card style={{ borderTop: '3px solid var(--color-accent)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
         <div>
@@ -52,127 +54,133 @@ export function ProbabilityVsFrequency({
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <TrendingUp size={16} color="var(--color-accent)" aria-hidden="true" />
               <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>
-                Frecuencia Histórica
+                Rendimiento en la Temporada Actual
               </h3>
             </div>
-            <Badge variant="win">Últimos {windowSize} partidos</Badge>
+            <Badge variant="win">{competitionName} · Temporada Actual</Badge>
           </div>
 
           <p style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)', marginBottom: '0.75rem' }}>
-            Registro empírico de lo que <strong>ocurrió realmente</strong> en los últimos partidos disputados por cada equipo por separado.
+            Registro oficial y verídico de lo <strong>ocurrido en la competición actual</strong> por cada equipo en la temporada presente.
           </p>
 
-          <div
-            style={{
-              fontSize: '0.75rem',
-              color: 'var(--color-text-muted)',
-              background: 'var(--color-surface-subtle)',
-              padding: '0.4rem 0.6rem',
-              borderRadius: 'var(--radius-sm)',
-              marginBottom: '1rem',
-              border: '1px solid var(--color-border-subtle)',
-            }}
-          >
-            Muestra analizada: <strong>{homeSampleSize}</strong> partidos de {homeTeamName} · <strong>{awaySampleSize}</strong> partidos de {awayTeamName}
-          </div>
+          {hasData ? (
+            <>
+              <div
+                style={{
+                  fontSize: '0.75rem',
+                  color: 'var(--color-text-muted)',
+                  background: 'var(--color-surface-subtle)',
+                  padding: '0.4rem 0.6rem',
+                  borderRadius: 'var(--radius-sm)',
+                  marginBottom: '1rem',
+                  border: '1px solid var(--color-border-subtle)',
+                }}
+              >
+                Partidos disputados en la temporada: <strong>{homeSampleSize}</strong> de {homeTeamName} · <strong>{awaySampleSize}</strong> de {awayTeamName}
+              </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {/* Tarjeta Equipo Local */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {/* Tarjeta Equipo Local */}
+                <div
+                  style={{
+                    background: 'rgba(91, 140, 255, 0.05)',
+                    border: '1px solid rgba(91, 140, 255, 0.2)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '0.75rem',
+                  }}
+                >
+                  <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-secondary)', marginBottom: '0.5rem' }}>
+                    {homeTeamName} (Local)
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.8125rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ color: 'var(--color-text-secondary)' }}>Victorias:</span>
+                      <span style={{ fontWeight: 600, color: 'var(--color-accent)' }}>
+                        Ganó {homeWins} de {homeSampleSize} ({frequencies.home.homeTeamWins}%)
+                      </span>
+                    </div>
+                    {isFootball && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ color: 'var(--color-text-secondary)' }}>Empates:</span>
+                        <span style={{ fontWeight: 500, color: 'var(--color-text-primary)' }}>
+                          Empató {homeDraws} de {homeSampleSize} ({frequencies.home.draws}%)
+                        </span>
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ color: 'var(--color-text-secondary)' }}>Derrotas:</span>
+                      <span style={{ fontWeight: 500, color: 'var(--color-text-muted)' }}>
+                        Perdió {homeLosses} de {homeSampleSize} ({frequencies.home.awayTeamWins}%)
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '0.25rem', borderTop: '1px dashed var(--color-border-subtle)' }}>
+                      <span style={{ color: 'var(--color-text-secondary)' }}>Media {isFootball ? 'goles por partido' : 'puntos por partido'}:</span>
+                      <span style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>
+                        {frequencies.home.avgGoalsOrPointsScored} anotados / {frequencies.home.avgGoalsOrPointsConceded} recibidos
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tarjeta Equipo Visitante */}
+                <div
+                  style={{
+                    background: 'rgba(45, 212, 167, 0.05)',
+                    border: '1px solid rgba(45, 212, 167, 0.2)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '0.75rem',
+                  }}
+                >
+                  <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-accent)', marginBottom: '0.5rem' }}>
+                    {awayTeamName} (Visitante)
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.8125rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ color: 'var(--color-text-secondary)' }}>Victorias:</span>
+                      <span style={{ fontWeight: 600, color: 'var(--color-accent)' }}>
+                        Ganó {awayWins} de {awaySampleSize} ({frequencies.away.homeTeamWins}%)
+                      </span>
+                    </div>
+                    {isFootball && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ color: 'var(--color-text-secondary)' }}>Empates:</span>
+                        <span style={{ fontWeight: 500, color: 'var(--color-text-primary)' }}>
+                          Empató {awayDraws} de {awaySampleSize} ({frequencies.away.draws}%)
+                        </span>
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ color: 'var(--color-text-secondary)' }}>Derrotas:</span>
+                      <span style={{ fontWeight: 500, color: 'var(--color-text-muted)' }}>
+                        Perdió {awayLosses} de {awaySampleSize} ({frequencies.away.awayTeamWins}%)
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '0.25rem', borderTop: '1px dashed var(--color-border-subtle)' }}>
+                      <span style={{ color: 'var(--color-text-secondary)' }}>Media {isFootball ? 'goles por partido' : 'puntos por partido'}:</span>
+                      <span style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>
+                        {frequencies.away.avgGoalsOrPointsScored} anotados / {frequencies.away.avgGoalsOrPointsConceded} recibidos
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : (
             <div
               style={{
-                background: 'rgba(91, 140, 255, 0.05)',
-                border: '1px solid rgba(91, 140, 255, 0.2)',
+                padding: '1.5rem 1rem',
+                textAlign: 'center',
+                background: 'var(--color-surface-subtle)',
+                border: '1px dashed var(--color-border-subtle)',
                 borderRadius: 'var(--radius-md)',
-                padding: '0.75rem',
               }}
             >
-              <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-secondary)', marginBottom: '0.5rem' }}>
-                {homeTeamName} (Local)
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.8125rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: 'var(--color-text-secondary)' }}>Victorias:</span>
-                  <span style={{ fontWeight: 600, color: 'var(--color-accent)' }}>
-                    Ganó {homeWins} de {homeSampleSize} ({frequencies.home.homeTeamWins}%)
-                  </span>
-                </div>
-                {isFootball && (
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: 'var(--color-text-secondary)' }}>Empates:</span>
-                    <span style={{ fontWeight: 500, color: 'var(--color-text-primary)' }}>
-                      Empató {homeDraws} de {homeSampleSize} ({frequencies.home.draws}%)
-                    </span>
-                  </div>
-                )}
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: 'var(--color-text-secondary)' }}>Derrotas:</span>
-                  <span style={{ fontWeight: 500, color: 'var(--color-text-muted)' }}>
-                    Perdió {homeLosses} de {homeSampleSize} ({frequencies.home.awayTeamWins}%)
-                  </span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '0.25rem', borderTop: '1px dashed var(--color-border-subtle)' }}>
-                  <span style={{ color: 'var(--color-text-secondary)' }}>{isFootball ? '>2.5 goles:' : '>215.5 pts:'}</span>
-                  <span style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>
-                    {frequencies.home.over25GoalsOrOverPointsRate}% de sus partidos
-                  </span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: 'var(--color-text-secondary)' }}>Media {isFootball ? 'goles' : 'puntos'}:</span>
-                  <span style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>
-                    {frequencies.home.avgGoalsOrPointsScored} anotados / {frequencies.home.avgGoalsOrPointsConceded} recibidos
-                  </span>
-                </div>
-              </div>
+              <p style={{ fontSize: '0.8125rem', color: 'var(--color-text-muted)' }}>
+                Sin datos de clasificación oficial disponibles en la fuente para esta competición.
+              </p>
             </div>
-
-            {/* Tarjeta Equipo Visitante */}
-            <div
-              style={{
-                background: 'rgba(45, 212, 167, 0.05)',
-                border: '1px solid rgba(45, 212, 167, 0.2)',
-                borderRadius: 'var(--radius-md)',
-                padding: '0.75rem',
-              }}
-            >
-              <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-accent)', marginBottom: '0.5rem' }}>
-                {awayTeamName} (Visitante)
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.8125rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: 'var(--color-text-secondary)' }}>Victorias:</span>
-                  <span style={{ fontWeight: 600, color: 'var(--color-accent)' }}>
-                    Ganó {awayWins} de {awaySampleSize} ({frequencies.away.homeTeamWins}%)
-                  </span>
-                </div>
-                {isFootball && (
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: 'var(--color-text-secondary)' }}>Empates:</span>
-                    <span style={{ fontWeight: 500, color: 'var(--color-text-primary)' }}>
-                      Empató {awayDraws} de {awaySampleSize} ({frequencies.away.draws}%)
-                    </span>
-                  </div>
-                )}
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: 'var(--color-text-secondary)' }}>Derrotas:</span>
-                  <span style={{ fontWeight: 500, color: 'var(--color-text-muted)' }}>
-                    Perdió {awayLosses} de {awaySampleSize} ({frequencies.away.awayTeamWins}%)
-                  </span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '0.25rem', borderTop: '1px dashed var(--color-border-subtle)' }}>
-                  <span style={{ color: 'var(--color-text-secondary)' }}>{isFootball ? '>2.5 goles:' : '>215.5 pts:'}</span>
-                  <span style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>
-                    {frequencies.away.over25GoalsOrOverPointsRate}% de sus partidos
-                  </span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: 'var(--color-text-secondary)' }}>Media {isFootball ? 'goles' : 'puntos'}:</span>
-                  <span style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>
-                    {frequencies.away.avgGoalsOrPointsScored} anotados / {frequencies.away.avgGoalsOrPointsConceded} recibidos
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
 
         {/* Pie de Bloque: Fuente y Actualización */}
@@ -196,7 +204,7 @@ export function ProbabilityVsFrequency({
       </Card>
 
       {/* =========================================================================
-          BLOQUE 2: PROBABILIDAD ESTIMADA (AZUL ANALÍTICO #5B8CFF)
+          BLOQUE 2: PROBABILIDAD ESTIMADA POR RENDIMIENTO (AZUL ANALÍTICO #5B8CFF)
           ========================================================================= */}
       <Card style={{ borderTop: isSampleSufficient ? '3px solid var(--color-secondary)' : '3px solid var(--color-warning)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
         <div>
@@ -299,7 +307,7 @@ export function ProbabilityVsFrequency({
                 Sin datos suficientes para proyectar
               </h4>
               <p style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)', lineHeight: 1.4 }}>
-                Este encuentro no alcanza el umbral de seguridad de 5 partidos en la competición actual. Para proteger la honestidad de la herramienta, no se generan probabilidades inventadas.
+                Este encuentro no cuenta con datos de clasificación oficial en la temporada actual. Para proteger la honestidad de la herramienta, no se generan probabilidades inventadas.
               </p>
             </div>
           )}

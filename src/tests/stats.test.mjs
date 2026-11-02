@@ -13,6 +13,7 @@ import { calculateFrequencies, calculateWeightedMomentum } from '../core/stats/f
 import { calculatePoissonProbability, calculateFootballProbabilities } from '../core/stats/poisson.ts';
 import { calculateBasketballProbabilities } from '../core/stats/basketballModel.ts';
 import { calculateEmpiricalProbabilities } from '../core/stats/empiricalProbabilities.ts';
+import { SeasonStandingsService } from '../data/services/seasonStandingsService.ts';
 
 test('1. Guardia de Muestra Mínima (Sample Guard)', async (t) => {
   await t.test('debe bloquear cálculos si la muestra es menor a 5 partidos', () => {
@@ -165,5 +166,29 @@ test('6. Probabilidades Empíricas Basadas en Rendimiento Real (calculateEmpiric
     assert.equal(result.homeWinProb + result.awayWinProb, 100);
     assert.equal(result.drawProb, undefined);
     assert.ok(result.homeWinProb > 50);
+  });
+});
+
+test('7. Servicio de Clasificaciones Oficiales de Temporada (SeasonStandingsService)', async (t) => {
+  await t.test('debe normalizar y resolver alias de clubes correctamente', () => {
+    assert.equal(SeasonStandingsService.normalize('Deportivo de A Coruña'), 'deportivo');
+    assert.equal(SeasonStandingsService.normalize('CA Osasuna'), 'osasuna');
+    assert.equal(SeasonStandingsService.normalize('Atlético de Madrid'), 'atletico madrid');
+    assert.equal(SeasonStandingsService.normalize('Celta de Vigo'), 'celta vigo');
+  });
+
+  await t.test('debe emparejar nombres de equipos de Flashscore con clasificaciones oficiales', () => {
+    assert.equal(SeasonStandingsService.matchesTeam('Deportivo de A Coruña', 'Deportivo', 'DEP'), true);
+    assert.equal(SeasonStandingsService.matchesTeam('Osasuna', 'Osasuna', 'OSA'), true);
+    assert.equal(SeasonStandingsService.matchesTeam('Deportivo Alavés', 'Alavés', 'ALA'), true);
+    assert.equal(SeasonStandingsService.matchesTeam('Atlético de Madrid', 'Atlético Madrid', 'ATM'), true);
+    assert.equal(SeasonStandingsService.matchesTeam('Real Madrid', 'Real Madrid', 'RMA'), true);
+  });
+
+  await t.test('debe mapear correctamente los códigos de liga', () => {
+    const fbCodes = SeasonStandingsService.resolveLeagueCodes('esp.1', 'football');
+    assert.ok(fbCodes.includes('esp.1'));
+    const nbaCodes = SeasonStandingsService.resolveLeagueCodes('nba', 'basketball');
+    assert.deepEqual(nbaCodes, ['nba']);
   });
 });

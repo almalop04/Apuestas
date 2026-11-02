@@ -36,7 +36,6 @@ function getCountryFlag(country: string): string {
 export default function DashboardPage() {
   const [sport, setSport] = useState<SportType>('football');
   const [dataMode, setDataMode] = useState<'live' | 'mock'>('live');
-  const [windowSize, setWindowSize] = useState<5 | 10>(5);
   const [dayOffset, setDayOffset] = useState<number>(0);
   const [selectedLeague, setSelectedLeague] = useState<string>('all');
   const [matches, setMatches] = useState<MatchDetail[]>([]);
@@ -851,7 +850,7 @@ export default function DashboardPage() {
                     {!isCollapsed && (
                       <div className="matches-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
                         {group.matches.map((m) => (
-                          <MatchCard key={m.id} match={m} windowSize={windowSize} />
+                          <MatchCard key={m.id} match={m} />
                         ))}
                       </div>
                     )}

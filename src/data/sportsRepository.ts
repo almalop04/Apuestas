@@ -19,6 +19,7 @@ import { MockSportsProvider } from './providers/mockProvider.ts';
 import { FootballApiProvider } from './providers/footballApiProvider.ts';
 import { LivePublicSportsProvider } from './providers/livePublicProvider.ts';
 import { FlashscoreSportsProvider } from './providers/flashscoreProvider.ts';
+import { SeasonStandingsService } from './services/seasonStandingsService.ts';
 import { logError, logInfo } from './logger.ts';
 
 export class SportsRepository {
@@ -98,6 +99,13 @@ export class SportsRepository {
         matches = await this.mockProvider.getTodayMatches(sport, dayOffset);
       }
 
+      // Enriquecer partidos con datos oficiales verídicos de la temporada actual
+      if (matches.length > 0) {
+        matches = await Promise.all(
+          matches.map((m) => SeasonStandingsService.enrichMatchWithSeasonStats(m))
+        );
+      }
+
       // Guardar en caché (120 segundos para partidos del día)
       const ttl = Number(process.env.CACHE_TTL_LIVE_MATCHES) || 120;
       CacheManager.set(cacheKey, matches, ttl);
@@ -146,6 +154,8 @@ export class SportsRepository {
       }
 
       if (match) {
+        // Enriquecer con datos 100% verídicos de la temporada actual
+        match = await SeasonStandingsService.enrichMatchWithSeasonStats(match);
         CacheManager.set(cacheKey, match, 300);
       }
       return { match, fromCache: false };

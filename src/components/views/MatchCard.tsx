@@ -10,11 +10,10 @@ import { CountryFlag } from '../ui/CountryFlag';
 
 interface MatchCardProps {
   match: MatchDetail;
-  windowSize?: 5 | 10;
 }
 
-export function MatchCard({ match, windowSize = 5 }: MatchCardProps) {
-  const freq = windowSize === 5 ? match.frequencies5 : match.frequencies10;
+export function MatchCard({ match }: MatchCardProps) {
+  const freq = match.frequencies10;
   const isFootball = match.sport === 'football';
   const isSampleOk = match.dataAvailability.isSampleSufficient;
 
@@ -192,12 +191,18 @@ export function MatchCard({ match, windowSize = 5 }: MatchCardProps) {
             }}
           >
             <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--color-accent)' }} />
-            Frecuencia Histórica ({windowSize} partidos)
+            Rendimiento en la Temporada Actual
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: 'var(--color-text-secondary)', gap: '0.5rem' }}>
-            <span>{match.homeTeam.shortName || 'Local'}: <strong style={{ color: 'var(--color-accent)' }}>{freq.home.homeTeamWins}% vics</strong></span>
-            <span>{match.awayTeam.shortName || 'Visitante'}: <strong style={{ color: 'var(--color-accent)' }}>{freq.away.homeTeamWins}% vics</strong></span>
-          </div>
+          {freq.home.totalMatchesEvaluated > 0 || freq.away.totalMatchesEvaluated > 0 ? (
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: 'var(--color-text-secondary)', gap: '0.5rem' }}>
+              <span>{match.homeTeam.shortName || 'Local'}: <strong style={{ color: 'var(--color-accent)' }}>{freq.home.homeTeamWins}% vics</strong></span>
+              <span>{match.awayTeam.shortName || 'Visitante'}: <strong style={{ color: 'var(--color-accent)' }}>{freq.away.homeTeamWins}% vics</strong></span>
+            </div>
+          ) : (
+            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+              Sin datos oficiales de clasificación
+            </div>
+          )}
         </div>
 
         {/* 2. Probabilidad Estimada (Azul analítico #5B8CFF) */}

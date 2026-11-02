@@ -24,7 +24,6 @@ export default function MatchDetailPage() {
   const [match, setMatch] = useState<MatchDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [windowSize, setWindowSize] = useState<5 | 10>(5);
 
   useEffect(() => {
     if (!matchId) return;
@@ -80,7 +79,7 @@ export default function MatchDetailPage() {
   }
 
   const isFootball = match.sport === 'football';
-  const frequencies = windowSize === 5 ? match.frequencies5 : match.frequencies10;
+  const frequencies = match.frequencies10;
 
   // Columnas para la tabla H2H
   const h2hColumns = [
@@ -260,24 +259,14 @@ export default function MatchDetailPage() {
         )}
       </Card>
 
-      {/* Control de Muestra (5 vs 10 partidos) */}
+      {/* Título de la sección de análisis oficial de la temporada */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
         <h2 style={{ fontSize: '1.125rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>
-          Módulo de Análisis Comparativo
+          Rendimiento en la Temporada y Análisis Probabilístico
         </h2>
-
-        <SegmentedControl<string>
-          ariaLabel="Seleccionar tamaño de muestra histórica"
-          value={String(windowSize)}
-          onChange={(val) => setWindowSize(Number(val) as 5 | 10)}
-          options={[
-            { value: '5', label: 'Ventana: Últimos 5 partidos' },
-            { value: '10', label: 'Ventana: Últimos 10 partidos' },
-          ]}
-        />
       </div>
 
-      {/* Bloque estricto: Frecuencia (Verde) vs Probabilidad (Azul) */}
+      {/* Bloque: Rendimiento Oficial de la Temporada vs Probabilidad */}
       <ProbabilityVsFrequency
         frequencies={frequencies}
         probabilities={match.probabilities}
@@ -285,7 +274,7 @@ export default function MatchDetailPage() {
         awayTeamName={match.awayTeam.name}
         isFootball={isFootball}
         isSampleSufficient={match.dataAvailability.isSampleSufficient}
-        windowSize={windowSize}
+        competitionName={match.league.name}
         sourceName={match.dataAvailability.sourceName}
         lastUpdated={match.dataAvailability.lastUpdated}
       />
