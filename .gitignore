@@ -25,6 +25,7 @@ logs/
 
 # Archivos de caché local y almacenamiento en disco
 data/cache/store/
+scratch/
 *.sqlite
 *.sqlite3
 
