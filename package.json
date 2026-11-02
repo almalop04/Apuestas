@@ -7,7 +7,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "node --experimental-strip-types --test src/tests/stats.test.mjs src/tests/cache.test.mjs"
+    "test": "node --experimental-strip-types --test src/tests/stats.test.mjs src/tests/cache.test.mjs src/tests/marketCalculator.test.mjs"
   },
   "dependencies": {
     "next": "^15.1.6",
