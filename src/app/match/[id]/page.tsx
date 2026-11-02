@@ -15,6 +15,7 @@ import { ProbabilityVsFrequency } from '@/components/views/ProbabilityVsFrequenc
 import { Skeleton } from '@/components/ui/Skeleton';
 import { TeamLogo } from '@/components/ui/TeamLogo';
 import { CountryFlag } from '@/components/ui/CountryFlag';
+import { AiAnalysisCard } from '@/components/views/AiAnalysisCard';
 
 export default function MatchDetailPage() {
   const params = useParams();
@@ -287,6 +288,14 @@ export default function MatchDetailPage() {
         windowSize={windowSize}
         sourceName={match.dataAvailability.sourceName}
         lastUpdated={match.dataAvailability.lastUpdated}
+      />
+
+      {/* Tarjeta de Análisis IA y Cuotas Justas (Gemini Free Tier) */}
+      <AiAnalysisCard
+        matchId={match.id}
+        homeTeamName={match.homeTeam.name}
+        awayTeamName={match.awayTeam.name}
+        isFootball={isFootball}
       />
 
       {/* Barras Comparativas de Métricas Avanzadas */}

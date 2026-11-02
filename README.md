@@ -1,6 +1,6 @@
-# 🏆 ProStats — Plataforma Profesional de Analítica Deportiva (Fútbol y Baloncesto)
+# 🏆 ProStats — Plataforma Profesional de Analítica Deportiva con IA (Fútbol y Baloncesto)
 
-Bienvenido a **ProStats**, una plataforma web de analítica deportiva avanzada diseñada con estándares profesionales de panel de control oscuro (fintech/terminal analítica). 
+Bienvenido a **ProStats**, una plataforma web de analítica deportiva avanzada y cuotas justas, diseñada con estándares profesionales de panel de control oscuro (fintech/terminal analítica) e impulsada por **Google Gemini en su plan 100% gratuito**.
 
 Este manual está redactado especialmente para **personas sin conocimientos de programación**: con un solo paso podrás ponerla en marcha y entender todo lo que ves en pantalla.
 
@@ -8,116 +8,97 @@ Este manual está redactado especialmente para **personas sin conocimientos de p
 
 ## ⚡ 1. Cómo encender la aplicación (En 1 solo paso)
 
-Como ya tienes **Node.js** instalado en tu ordenador, no necesitas instalar nada más.
-
 1. Abre la terminal o consola de comandos en esta carpeta (`Apuestas`).
 2. Escribe el siguiente comando y pulsa **Enter**:
    ```bash
    npm run dev
    ```
 3. Verás un mensaje que dice:
-   ```
+   ```text
    ✓ Starting...
    - Local: http://localhost:3000
    ```
-4. Abre tu navegador favorito (Chrome, Edge, Firefox, Safari) y entra en:
+4. Abre tu navegador (Chrome, Edge, Firefox, Safari) y entra en:
    👉 **http://localhost:3000**
 
 ¡Listo! La web estará funcionando a pleno rendimiento en tu pantalla.
 
 ---
 
-## 🧭 2. Cómo usar la web (Guía visual)
+## 🤖 2. Análisis con Inteligencia Artificial (Gemini Plan 100% Gratuito)
 
-### A. Dashboard Principal (Partidos de Hoy)
-- **Selector de deporte**: Puedes alternar con un clic entre **Fútbol** y **Baloncesto**.
-- **Selector de Modo en Vivo vs Simulador**:
-  - `🔴 Partidos Reales Hoy`: Se conecta automáticamente a los marcadores deportivos oficiales y carga los **partidos reales del mundo que se juegan hoy** (LaLiga, Premier League, Serie A, Champions League y NBA), con sus escudos oficiales y proyecciones actualizadas. ¡No necesitas registrarte ni introducir ninguna clave!
-  - `Simulador`: Te permite volver a los partidos de prueba controlados para verificar casos especiales como el aviso de "Sin datos suficientes".
-- **Ventana de análisis**: Puedes cambiar entre ver las estadísticas de los **Últimos 5 partidos** o de los **Últimos 10 partidos**.
-- **Monitor de API**: En la esquina superior derecha verás `API: 1/100`. Indica cuántas peticiones se han gastado hoy de tu cupo seguro. Al llegar al límite diario se bloquea automáticamente para que **nunca tengas sorpresas ni costes**.
-- **Transparencia de datos**: Cada tarjeta indica la fuente de los datos (por ejemplo, *Feed Deportivo Oficial (En Vivo)*) y hace cuántos minutos se actualizaron.
+En la ficha de cada partido dispones de una tarjeta llamada **"Análisis IA y Cuotas Justas"**.
 
-### B. Regla de los 2 Clics
-- **Clic 1**: Pulsa en cualquier tarjeta de partido o en *"Ver análisis detallado y H2H"*. Irás a la ficha completa del encuentro con el cara a cara histórico, modelos matemáticos y barras comparativas.
-- **Clic 2**: Pulsa en el nombre de cualquier equipo (p. ej. *Real Madrid* o *FC Barcelona*). Irás directamente a su ficha individual con sus estadísticas de la temporada y sus últimos partidos.
+### ¿Cómo funciona la IA en ProStats?
+* **La IA no calcula ni inventa**: Todos los números y probabilidades los calcula previamente el código matemático en tu ordenador. La IA únicamente redacta una explicación en español claro sobre qué resultados favorecen las estadísticas y qué cuotas tendrían valor teórico.
+* **Control de alucinaciones**: Un filtro automático revisa cada respuesta de Gemini; si la IA intentara citar un porcentaje inventado, se descarta y se muestra el explicador por plantillas.
+* **Protección de límites**: El análisis solo se genera cuando tú pulsas manualmente el botón *"Generar análisis del partido"*. Cada análisis se guarda en caché durante 24 horas para que no gastes peticiones si vuelves a entrar.
+* **Límite diario seguro**: Viene configurada con un tope de **50 análisis al día**. Al llegar a ese número, se activa automáticamente el explicador por plantillas sin errores ni bloqueos.
+* **Privacidad**: Nunca se envían datos personales ni nombres de usuario a Google; únicamente los datos numéricos del encuentro. *(Nota: En el plan gratuito de Google AI Studio, Google puede usar los datos públicos enviados para mejorar sus modelos)*.
 
-### C. La regla de oro: Frecuencia vs. Probabilidad
-Para que nunca haya confusión ni engaño, la web separa de forma estricta dos conceptos que suelen mezclarse erróneamente:
-1. **Frecuencia Histórica (Color Verde Esmeralda #2DD4A7)**: 
-   - Te dice **lo que ya ocurrió** en la realidad en los últimos partidos (por ejemplo: *"El equipo local ganó 4 de sus últimos 5 partidos, un 80%"*).
-2. **Probabilidad Estimada (Color Azul Analítico #5B8CFF)**: 
-   - Es una proyección matemática teórica que neutraliza sesgos del pasado reciente, midiendo el ataque real del local contra la debilidad defensiva del visitante.
-
-### D. ¿Qué significa "Sin datos suficientes"?
-Si un equipo tiene **menos de 5 partidos jugados** en la competición (por ejemplo, en las primeras jornadas o en rondas iniciales de copa), el sistema **no inventa números ni muestra huecos en blanco**.
-Muestra una tarjeta ámbar (`#F5B84B`) advirtiendo:
-`"Sin datos suficientes para proyectar (<5 partidos)"`. De esta forma se protege la honestidad del análisis.
+### ¿Cómo conseguir tu clave gratuita de Gemini (en 2 minutos)?
+1. Entra en [Google AI Studio](https://aistudio.google.com/).
+2. Inicia sesión con tu cuenta de Google (Gmail).
+3. Haz clic en el botón azul **"Get API key"** (Obtener clave de API).
+4. Pulsa en **"Create API key in new project"**.
+5. Copia la clave generada (empieza por `AIza...` o `AQ...`). **No requiere tarjeta de crédito ni facturación**.
+6. Abre el archivo `.env.local` en la carpeta del proyecto y pega tu clave:
+   ```env
+   GEMINI_API_KEY=tu_clave_aqui
+   GEMINI_MODEL=gemini-2.5-flash
+   GEMINI_DAILY_LIMIT=50
+   ```
+7. Guarda el archivo. ¡Ya tienes el análisis inteligente activado!
 
 ---
 
-## 🔬 3. Explicación de los Modelos Matemáticos
+## 🧭 3. Guía de Uso de la Interfaz
 
-### Modelo de Fútbol (Distribución Bivariada de Poisson)
-- **Idea central**: En el fútbol se marcan pocos goles por partido (media habitual de ~1.4 goles por equipo).
-- **Cómo calcula**: Compara cuántos goles suele marcar el equipo local en su estadio contra cuántos suele encajar el visitante fuera de casa. Con ello calcula los **Goles Esperados (xG)** de cada bando.
-- Luego, mediante la fórmula estadística de Poisson, calcula la probabilidad exacta de cada marcador posible (0-0, 1-0, 2-1, etc.) y las suma para dar el % de victoria local (1), empate (X) y victoria visitante (2).
-- **Límites reales**: El modelo no puede predecir expulsiones tempranas, decisiones arbitrales ni cambios tácticos imprevistos.
+### A. Dashboard Principal
+* **Selector de deporte**: Alterna con un solo clic entre **Fútbol** y **Baloncesto**.
+* **Competiciones oficiales**: LaLiga EA Sports, LaLiga Hypermotion, Premier League, Champions League, Serie A, Bundesliga, Ligue 1 y NBA.
+* **Ventana de análisis (5 vs 10 partidos)**: Cambia entre el historial de los últimos 5 o 10 encuentros.
+* **Transparencia en vivo**: Cada tarjeta te indica la procedencia oficial de los marcadores en tiempo real (Flashscore.es, ESPN o Modelo).
 
-### Modelo de Baloncesto (Ritmo y Eficiencia por Posesión)
-- **Idea central**: En baloncesto se juegan entre 80 y 105 posesiones por partido.
-- **Cómo calcula**: Estima cuántas posesiones jugarán ambos equipos (**Ritmo o Pace**) y cuántos puntos anotan por cada 100 posesiones (**Eficiencia Ofensiva vs Defensiva**), sumando la ventaja histórica de jugar en casa (~3.2 puntos).
-- A partir de la diferencia de puntos esperada, calcula el porcentaje de victoria de cada equipo. (En baloncesto no hay empate definitivo porque existen prórrogas).
-- **Límites reales**: En baloncesto, la baja de una sola estrella altera profundamente el quinteto.
+### B. Ficha Detallada del Partido
+Al hacer clic en cualquier partido verás:
+1. **Frecuencias Históricas (Verde Esmeralda)**: Desglosadas por equipo de forma independiente (*"Ganó 3 de 5 | Empató 1 de 5 | Perdió 1 de 5"*). No se mezclan para no crear confusión con un 1X2.
+2. **Probabilidades Estimadas del Modelo (Azul)**: Proyección matemática teórica (Poisson para fútbol y Ritmo/Eficiencia de posesión para NBA) que suma exactamente el 100%.
+3. **Tarjeta Análisis IA y Cuotas Justas**:
+   * Botón manual de generación.
+   * Tabla comparativa de **Cuota Justa ($1 / prob$)** vs **Cuota Real** del mercado. Si no hay cuotas de casas de apuestas, se indica limpiamente *"Sin datos"*.
+   * Nivel de confianza dictado por el código: **Alta** (muestra $\ge 8$), **Media** (5 a 7) o **Baja** ($< 5$ partidos).
+   * Lista de riesgos y aviso legal permanente: *"Estimación estadística, no resultado seguro ni promesa de rentabilidad."*
+4. **Métricas Cara a Cara**: Comparativa de goles y rendimiento. Si una métrica no está en la fuente oficial, se muestra *"Sin datos en la fuente"* sin inventar porcentajes.
+5. **Historial Directo (H2H)**: Enfrentamientos directos con fecha oficial de juego. Si no hay registros previos, se indica *"Sin datos previos"*.
 
 ---
 
-## 🧪 4. Cómo comprobar que todo funciona (Pruebas Automáticas)
+## 🧪 4. Pruebas Automáticas de Calidad
 
-Hemos programado una batería de **19 pruebas automáticas** que validan al milímetro que las fórmulas matemáticas, los límites de cuota y el tratamiento de datos incompletos no fallen jamás.
+El proyecto incluye **46 pruebas automáticas** que validan al milímetro que los cálculos matemáticos, el detector anti-alucinaciones, las cuotas justas y los límites de seguridad no fallen.
 
 Para ejecutarlas, abre tu terminal y escribe:
 ```bash
 npm test
 ```
-Verás un informe verde confirmando que el 100% de las pruebas han superado el control de calidad:
-```
-✔ 1. Guardia de Muestra Mínima (Sample Guard)
-✔ 2. Frecuencias Históricas (Últimos 5 y 10 partidos)
-✔ 3. Momentum Ponderado (Racha reciente)
-✔ 4. Modelo de Poisson (Fútbol)
-✔ 5. Modelo de Ritmo y Eficiencia (Baloncesto)
-✔ 6. Gestor de Caché Local (TTL)
-✔ 7. Monitor y Bloqueo de Cuota Diaria (Quota Tracker)
-
-ℹ tests 19 | pass 19 | fail 0
+Verás la confirmación inmediata:
+```text
+ℹ tests 46
+ℹ pass 46
+ℹ fail 0
 ```
 
 ---
 
 ## 🛠️ 5. Solución de Problemas Frecuentes
 
-### Problema 1: "El puerto 3000 ya está ocupado"
-- **Por qué ocurre**: Si ya tienes otra pestaña o proceso ejecutando la web.
-- **Solución**: Next.js automáticamente intentará abrir el puerto `3001` (entra en `http://localhost:3001`), o puedes cerrar las ventanas de terminal abiertas y volver a lanzar `npm run dev`.
+### Problema 1: "Aparece 'Límite temporal o error en la API de Google'"
+* **Causa**: Puede deberse a que no hay conexión a internet momentáneamente, a que la clave no se ha guardado en `.env.local` o a que se han alcanzado las 50 peticiones gratuitas del día.
+* **Solución**: La aplicación nunca se rompe. Cuando esto ocurre, activa automáticamente el **Explicador por Plantillas**, el cual redacta el análisis completo con los mismos números y cuotas justas sin gastar un solo céntimo.
 
-### Problema 2: "¿Cómo consulto los errores si algo falla?"
-- La aplicación cuenta con un registrador automático persistente en disco.
-- Todos los fallos técnicos se guardan de forma limpia en el archivo:
-  `logs/app-errors.log`
-- Si alguna vez algo no carga, basta con abrir ese archivo de texto para ver la causa exacta con fecha y hora.
+### Problema 2: "El puerto 3000 ya está ocupado"
+* **Solución**: Next.js intentará abrir el puerto `3001` (entra en `http://localhost:3001`), o puedes cerrar las terminales previas y volver a escribir `npm run dev`.
 
-### Problema 3: "¿Tengo que pagar por alguna API?"
-- **No, coste 0€**. La web viene configurada por defecto en modo simulado de alta fidelidad (`DATA_MODE=mock`), con partidos reales de LaLiga, Premier League, NBA y EuroLeague.
-- Si en el futuro quieres conectar una API de pago o gratuita oficial (como API-Football), solo tienes que abrir el archivo `.env.local`, pegar tu clave en `FOOTBALL_API_KEY=` y cambiar `DATA_MODE=live`. El sistema respetará el límite diario fijado en `DAILY_QUOTA_LIMIT=100` para protegerte de cobros inesperados.
-
----
-
-## 📁 6. Resumen de la Estructura de Archivos
-
-- `design-tokens.css`: Archivo único con todos los colores, tipografía, radios y sombras del sistema de diseño.
-- `src/core/stats/`: Toda la matemática pura (Poisson, Baloncesto, Frecuencias, Muestra mínima).
-- `src/data/cache/`: Sistema de caché local con caducidad y contador de peticiones.
-- `src/components/ui/`: Componentes visuales reutilizables (tarjetas, botones, tablas, barras, avisos).
-- `src/app/`: Las 3 pantallas principales (Dashboard, Ficha de partido y Ficha de equipo).
-- `src/tests/`: Pruebas automáticas de verificación continua.
+### Problema 3: "¿Tengo que pagar algo en algún momento?"
+* **Rotundamente NO**. Tanto la API de marcadores (Flashscore / ESPN) como el modelo de Google Gemini (`gemini-2.5-flash`) operan bajo planes gratuitos sin facturación.
