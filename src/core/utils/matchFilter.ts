@@ -49,3 +49,4 @@ export function hasMatchStarted(match: MatchDetail, nowEpochMs: number = Date.no
 export function filterBettableMatches(matches: MatchDetail[], nowEpochMs: number = Date.now()): MatchDetail[] {
   return matches.filter((m) => !hasMatchStarted(m, nowEpochMs));
 }
+
