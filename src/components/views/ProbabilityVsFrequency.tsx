@@ -44,7 +44,7 @@ export function ProbabilityVsFrequency({
   const awayLosses = frequencies.away.lossesCount ?? Math.max(0, awaySampleSize - awayWins - (isFootball ? awayDraws : 0));
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem', marginBottom: '1.5rem' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '1.25rem', marginBottom: '1.5rem' }}>
       {/* =========================================================================
           BLOQUE 1: RENDIMIENTO EN LA TEMPORADA ACTUAL (VERDE ESMERALDA #2DD4A7)
           ========================================================================= */}

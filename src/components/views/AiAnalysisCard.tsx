@@ -365,10 +365,15 @@ export function AiAnalysisCard({
                 })}
             </div>
 
-            <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+            <div className="table-scroll-hint">
+              <span>↔️ Desliza horizontalmente para ver cuotas completas</span>
+            </div>
+
+            <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border-subtle)' }}>
               <table
                 style={{
                   width: '100%',
+                  minWidth: '560px',
                   borderCollapse: 'collapse',
                   fontSize: '0.8125rem',
                   textAlign: 'left',

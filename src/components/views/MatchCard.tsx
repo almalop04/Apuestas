@@ -88,50 +88,48 @@ export function MatchCard({ match }: MatchCardProps) {
       </div>
 
       {/* Cuerpo principal: Equipos con Escudos y Marcador/Estado */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr auto 1fr',
-          alignItems: 'center',
-          gap: '1rem',
-          marginBottom: '1.25rem',
-        }}
-      >
+      <div className="match-card-teams-grid">
         {/* Equipo Local con Escudo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textAlign: 'left' }}>
-          <TeamLogo logoUrl={match.homeTeam.logoUrl} teamName={match.homeTeam.name} sport={match.sport} size={38} />
-          <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', textAlign: 'left', minWidth: 0 }}>
+          <div style={{ flexShrink: 0 }}>
+            <TeamLogo logoUrl={match.homeTeam.logoUrl} teamName={match.homeTeam.name} sport={match.sport} size={36} />
+          </div>
+          <div style={{ minWidth: 0, overflow: 'hidden' }}>
             <Link
               href={`/team/${match.homeTeam.id}`}
               style={{
-                fontSize: '1.0625rem',
+                fontSize: 'clamp(0.85rem, 3.2vw, 1.05rem)',
                 fontWeight: 600,
                 color: 'var(--color-text-primary)',
-                display: 'inline-block',
-                lineHeight: 1.2,
+                display: 'block',
+                lineHeight: 1.25,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
               }}
               onClick={(e) => e.stopPropagation()}
-              title="Ver ficha del equipo local"
+              title={match.homeTeam.name}
             >
               {match.homeTeam.name}
             </Link>
-            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginTop: '2px' }}>
+            <div style={{ fontSize: '0.72rem', color: 'var(--color-text-secondary)', marginTop: '2px' }}>
               Local
             </div>
           </div>
         </div>
 
         {/* Marcador o VS */}
-        <div style={{ textAlign: 'center' }}>
+        <div style={{ textAlign: 'center', flexShrink: 0, padding: '0 2px' }}>
           <span
             style={{
-              fontSize: '0.875rem',
-              fontWeight: 600,
-              padding: '0.25rem 0.65rem',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              padding: '0.2rem 0.5rem',
               background: 'var(--color-surface-subtle)',
               border: '1px solid var(--color-border)',
               borderRadius: 'var(--radius-sm)',
               color: 'var(--color-text-secondary)',
+              display: 'inline-block',
             }}
           >
             VS
@@ -139,42 +137,37 @@ export function MatchCard({ match }: MatchCardProps) {
         </div>
 
         {/* Equipo Visitante con Escudo */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.75rem', textAlign: 'right' }}>
-          <div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.6rem', textAlign: 'right', minWidth: 0 }}>
+          <div style={{ minWidth: 0, overflow: 'hidden' }}>
             <Link
               href={`/team/${match.awayTeam.id}`}
               style={{
-                fontSize: '1.0625rem',
+                fontSize: 'clamp(0.85rem, 3.2vw, 1.05rem)',
                 fontWeight: 600,
                 color: 'var(--color-text-primary)',
-                display: 'inline-block',
-                lineHeight: 1.2,
+                display: 'block',
+                lineHeight: 1.25,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
               }}
               onClick={(e) => e.stopPropagation()}
-              title="Ver ficha del equipo visitante"
+              title={match.awayTeam.name}
             >
               {match.awayTeam.name}
             </Link>
-            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginTop: '2px' }}>
+            <div style={{ fontSize: '0.72rem', color: 'var(--color-text-secondary)', marginTop: '2px' }}>
               Visitante
             </div>
           </div>
-          <TeamLogo logoUrl={match.awayTeam.logoUrl} teamName={match.awayTeam.name} sport={match.sport} size={38} />
+          <div style={{ flexShrink: 0 }}>
+            <TeamLogo logoUrl={match.awayTeam.logoUrl} teamName={match.awayTeam.name} sport={match.sport} size={36} />
+          </div>
         </div>
       </div>
 
       {/* Separación Estricta: Frecuencia Histórica (Verde) vs Probabilidad Estimada (Azul) */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-          gap: '0.75rem',
-          background: 'var(--color-surface-subtle)',
-          padding: '0.875rem',
-          borderRadius: 'var(--radius-md)',
-          border: '1px solid var(--color-border-subtle)',
-        }}
-      >
+      <div className="match-card-stats-grid">
         {/* 1. Frecuencia Histórica (Verde esmeralda #2DD4A7) */}
         <div>
           <div
@@ -194,7 +187,7 @@ export function MatchCard({ match }: MatchCardProps) {
             Rendimiento en la Temporada Actual
           </div>
           {freq.home.totalMatchesEvaluated > 0 || freq.away.totalMatchesEvaluated > 0 ? (
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: 'var(--color-text-secondary)', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: 'var(--color-text-secondary)', gap: '0.5rem', flexWrap: 'wrap' }}>
               <span>{match.homeTeam.shortName || 'Local'}: <strong style={{ color: 'var(--color-accent)' }}>{freq.home.homeTeamWins}% vics</strong></span>
               <span>{match.awayTeam.shortName || 'Visitante'}: <strong style={{ color: 'var(--color-accent)' }}>{freq.away.homeTeamWins}% vics</strong></span>
             </div>
@@ -206,7 +199,7 @@ export function MatchCard({ match }: MatchCardProps) {
         </div>
 
         {/* 2. Probabilidad Estimada (Azul analítico #5B8CFF) */}
-        <div style={{ borderLeft: '1px solid var(--color-border)', paddingLeft: '0.75rem' }}>
+        <div className="match-card-stat-block-secondary">
           <div
             style={{
               fontSize: '0.6875rem',
@@ -224,7 +217,7 @@ export function MatchCard({ match }: MatchCardProps) {
             Probabilidad por Rendimiento Real
           </div>
           {isSampleOk ? (
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: 'var(--color-text-secondary)', gap: '0.5rem', flexWrap: 'wrap' }}>
               <span>1: <strong style={{ color: 'var(--color-secondary)' }}>{match.probabilities.homeWinProb}%</strong></span>
               {isFootball && <span>X: <strong style={{ color: 'var(--color-secondary)' }}>{match.probabilities.drawProb}%</strong></span>}
               <span>2: <strong style={{ color: 'var(--color-secondary)' }}>{match.probabilities.awayWinProb}%</strong></span>

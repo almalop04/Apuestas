@@ -61,7 +61,9 @@ html, body {
   line-height: 1.5;
   font-variant-numeric: var(--font-tabular);
   -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 a {
@@ -87,10 +89,16 @@ button {
   width: 100%;
   max-width: 1240px;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 0.75rem;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 640px) {
+  .container {
+    padding: 0 1.25rem;
+  }
+}
+
+@media (min-width: 1024px) {
   .container {
     padding: 0 1.5rem;
   }
@@ -143,9 +151,15 @@ button {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  padding: 1.25rem;
+  padding: 1rem;
   transition: border-color 0.2s ease, transform 0.2s ease;
   position: relative;
+}
+
+@media (min-width: 640px) {
+  .card {
+    padding: 1.25rem;
+  }
 }
 
 .card:hover {
@@ -378,6 +392,17 @@ button {
   position: sticky;
   top: 1.5rem;
   z-index: 20;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 0.875rem;
+}
+
+@media (min-width: 640px) {
+  .dashboard-sidebar {
+    padding: 1.25rem;
+  }
 }
 
 .dashboard-main {
@@ -388,9 +413,218 @@ button {
 @media (max-width: 900px) {
   .dashboard-layout {
     flex-direction: column;
+    gap: 1.25rem;
   }
   .dashboard-sidebar {
     width: 100%;
     position: static;
+  }
+  .sidebar-sport-section.inactive-on-mobile {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   COMPONENTES RESPONSIVE OPTIMIZADOS PARA MÓVIL
+   ========================================================================== */
+
+/* Agrupación por liga / Sección de partidos */
+.league-group-section {
+  background: rgba(17, 26, 39, 0.45);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 0.875rem;
+  backdrop-filter: blur(8px);
+}
+
+@media (min-width: 640px) {
+  .league-group-section {
+    padding: 1.25rem;
+  }
+}
+
+/* Grid de Equipos en Tarjetas de Partido */
+.match-card-teams-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .match-card-teams-grid {
+    gap: 1rem;
+  }
+}
+
+/* Grid de Rendimiento Histórico vs Probabilidad en Tarjetas de Partido */
+.match-card-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  background: var(--color-surface-subtle);
+  padding: 0.75rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-subtle);
+}
+
+.match-card-stat-block-secondary {
+  border-top: 1px solid var(--color-border);
+  padding-top: 0.75rem;
+}
+
+@media (min-width: 600px) {
+  .match-card-stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    padding: 0.875rem;
+  }
+  .match-card-stat-block-secondary {
+    border-top: none;
+    padding-top: 0;
+    border-left: 1px solid var(--color-border);
+    padding-left: 0.875rem;
+  }
+}
+
+/* Cabecera de Equipos en Página de Detalle de Partido */
+.match-detail-header-teams {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 0;
+  border-top: 1px solid var(--color-border-subtle);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.match-detail-team-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.match-detail-team-box.home {
+  text-align: left;
+}
+
+.match-detail-team-box.away {
+  text-align: right;
+  justify-content: flex-end;
+}
+
+.match-detail-team-box .team-info {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.match-detail-team-box .team-title {
+  font-size: clamp(0.875rem, 3.5vw, 1.4rem);
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.25;
+  word-break: break-word;
+}
+
+.match-detail-team-box .team-sub {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--color-secondary);
+  display: block;
+  margin-top: 2px;
+}
+
+.match-detail-team-box .team-sub.accent {
+  color: var(--color-accent);
+}
+
+.match-detail-vs-box {
+  text-align: center;
+  flex-shrink: 0;
+  padding: 0 2px;
+}
+
+.match-detail-vs-badge {
+  font-size: clamp(0.75rem, 2.5vw, 1.125rem);
+  font-weight: 700;
+  padding: 0.25rem 0.5rem;
+  background: var(--color-surface-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  display: inline-block;
+}
+
+@media (min-width: 640px) {
+  .match-detail-header-teams {
+    gap: 1rem;
+    padding: 1rem 0;
+  }
+  .match-detail-team-box {
+    gap: 1rem;
+  }
+  .match-detail-team-box .team-sub {
+    font-size: 0.8125rem;
+  }
+  .match-detail-vs-badge {
+    padding: 0.4rem 0.85rem;
+    border-radius: var(--radius-md);
+  }
+}
+
+/* Selector Rápido de Deportes Móvil */
+.mobile-sport-selector {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .mobile-sport-selector {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.85rem;
+    width: 100%;
+  }
+
+  .mobile-sport-pill {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.6rem 0.75rem;
+    min-height: 44px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    background: var(--color-surface-subtle);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .mobile-sport-pill.active {
+    background: var(--color-secondary-subtle);
+    border-color: var(--color-secondary);
+    color: var(--color-text-primary);
+  }
+}
+
+/* Indicador de Desplazamiento Táctil en Tablas */
+.table-scroll-hint {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .table-scroll-hint {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.35rem;
+    font-size: 0.6875rem;
+    color: var(--color-text-muted);
+    margin-bottom: 0.35rem;
   }
 }

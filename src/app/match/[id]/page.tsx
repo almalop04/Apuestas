@@ -232,41 +232,45 @@ export default function MatchDetailPage() {
         </div>
 
         {/* Nombres de los equipos y enlaces a sus fichas con escudos */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: '1rem', padding: '1rem 0', borderTop: '1px solid var(--color-border-subtle)', borderBottom: '1px solid var(--color-border-subtle)' }}>
+        <div className="match-detail-header-teams">
           {/* Local con Escudo */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', textAlign: 'left' }}>
-            <TeamLogo logoUrl={match.homeTeam.logoUrl} teamName={match.homeTeam.name} sport={match.sport} size={52} />
-            <div>
-              <h1 style={{ fontSize: '1.5rem', fontWeight: 600, margin: 0, lineHeight: 1.2 }}>
+          <div className="match-detail-team-box home">
+            <div style={{ flexShrink: 0 }}>
+              <TeamLogo logoUrl={match.homeTeam.logoUrl} teamName={match.homeTeam.name} sport={match.sport} size={44} />
+            </div>
+            <div className="team-info">
+              <h1 className="team-title">
                 <Link href={`/team/${match.homeTeam.id}`} style={{ color: 'var(--color-text-primary)' }} title="Ver ficha completa del equipo local">
                   {match.homeTeam.name}
                 </Link>
               </h1>
-              <span style={{ fontSize: '0.8125rem', color: 'var(--color-secondary)', fontWeight: 500 }}>
+              <span className="team-sub">
                 Equipo Local
               </span>
             </div>
           </div>
 
-          <div style={{ textAlign: 'center' }}>
-            <span style={{ fontSize: '1.125rem', fontWeight: 600, padding: '0.4rem 0.85rem', background: 'var(--color-surface-subtle)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', color: 'var(--color-text-secondary)' }}>
+          <div className="match-detail-vs-box">
+            <span className="match-detail-vs-badge">
               VS
             </span>
           </div>
 
           {/* Visitante con Escudo */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '1rem', textAlign: 'right' }}>
-            <div>
-              <h2 style={{ fontSize: '1.5rem', fontWeight: 600, margin: 0, lineHeight: 1.2 }}>
+          <div className="match-detail-team-box away">
+            <div className="team-info">
+              <h2 className="team-title">
                 <Link href={`/team/${match.awayTeam.id}`} style={{ color: 'var(--color-text-primary)' }} title="Ver ficha completa del equipo visitante">
                   {match.awayTeam.name}
                 </Link>
               </h2>
-              <span style={{ fontSize: '0.8125rem', color: 'var(--color-accent)', fontWeight: 500 }}>
+              <span className="team-sub accent">
                 Equipo Visitante
               </span>
             </div>
-            <TeamLogo logoUrl={match.awayTeam.logoUrl} teamName={match.awayTeam.name} sport={match.sport} size={52} />
+            <div style={{ flexShrink: 0 }}>
+              <TeamLogo logoUrl={match.awayTeam.logoUrl} teamName={match.awayTeam.name} sport={match.sport} size={44} />
+            </div>
           </div>
         </div>
 

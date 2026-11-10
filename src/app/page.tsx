@@ -329,16 +329,29 @@ export default function DashboardPage() {
     <div className="container" style={{ paddingBottom: '3rem' }}>
       <div className="dashboard-layout">
         {/* PANEL LATERAL IZQUIERDO */}
-        <aside
-          className="dashboard-sidebar"
-          style={{
-            background: 'var(--color-surface)',
-            border: '1px solid var(--color-border)',
-            borderRadius: 'var(--radius-lg)',
-            padding: '1.25rem',
-            boxShadow: 'var(--shadow-md)',
-          }}
-        >
+        <aside className="dashboard-sidebar">
+          {/* Selector de Deporte Rápido e Intuitivo en Móvil (1 solo toque) */}
+          <div className="mobile-sport-selector">
+            <button
+              type="button"
+              className={`mobile-sport-pill ${sport === 'football' ? 'active' : ''}`}
+              onClick={() => handleSportChange('football')}
+              aria-label="Ver fútbol"
+            >
+              <span>⚽</span>
+              <span>Fútbol</span>
+            </button>
+            <button
+              type="button"
+              className={`mobile-sport-pill ${sport === 'basketball' ? 'active' : ''}`}
+              onClick={() => handleSportChange('basketball')}
+              aria-label="Ver baloncesto"
+            >
+              <span>🏀</span>
+              <span>Baloncesto</span>
+            </button>
+          </div>
+
           {/* Cabecera del Panel Lateral */}
           <div
             style={{
@@ -404,7 +417,7 @@ export default function DashboardPage() {
           </div>
 
           {/* 1. SECCIÓN FÚTBOL: Menú desplegable con todas las ligas */}
-          <div style={{ marginBottom: '1.25rem' }}>
+          <div className={`sidebar-sport-section ${sport !== 'football' ? 'inactive-on-mobile' : ''}`} style={{ marginBottom: '1.25rem' }}>
             <div
               style={{
                 display: 'flex',
@@ -459,7 +472,7 @@ export default function DashboardPage() {
           </div>
 
           {/* 2. SECCIÓN BALONCESTO: Menú desplegable con todas las ligas */}
-          <div style={{ marginBottom: '1.25rem' }}>
+          <div className={`sidebar-sport-section ${sport !== 'basketball' ? 'inactive-on-mobile' : ''}`} style={{ marginBottom: '1.25rem' }}>
             <div
               style={{
                 display: 'flex',
@@ -820,13 +833,7 @@ export default function DashboardPage() {
                   <section
                     key={group.leagueId}
                     aria-label={`Competición: ${group.leagueName}`}
-                    style={{
-                      background: 'rgba(17, 26, 39, 0.45)',
-                      border: '1px solid var(--color-border)',
-                      borderRadius: 'var(--radius-lg)',
-                      padding: '1.25rem',
-                      backdropFilter: 'blur(8px)',
-                    }}
+                    className="league-group-section"
                   >
                     {/* Cabecera Principal de la Competición / Liga */}
                     <div
