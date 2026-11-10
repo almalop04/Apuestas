@@ -241,11 +241,11 @@ export function AiAnalysisCard({
               >
                 <span>
                   {source === 'consensus'
-                    ? '🤝 Consenso Dual (Google Gemini + Meta Llama 3.3)'
+                    ? '🤝 Consenso Dual (Google Gemini + Groq AI)'
                     : source === 'gemini'
                     ? '✨ Generado por IA (Google Gemini)'
                     : source === 'llama'
-                    ? '🦙 Generado por IA (Meta Llama 3.3)'
+                    ? '⚡ Generado por IA (Groq AI)'
                     : '⚙️ Explicación automática (Plantilla)'}
                 </span>
                 {generatedAt && <span style={{ opacity: 0.8 }}>· {generatedAt}</span>}
@@ -461,7 +461,7 @@ export function AiAnalysisCard({
                                     alignItems: 'center',
                                     gap: '0.2rem',
                                   }}
-                                  title="Pronóstico verificado y acordado tanto por Google Gemini como por Meta Llama 3.3"
+                                  title="Pronóstico verificado y acordado de forma unánime tanto por Google Gemini como por el modelo secundario de IA"
                                 >
                                   🤝 Consenso Dual
                                 </span>
