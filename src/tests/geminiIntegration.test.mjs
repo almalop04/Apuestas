@@ -95,3 +95,77 @@ test('2. Validador Anti-Alucinaciones y Esquema JSON (GeminiValidator)', async (
   });
 });
 
+test('3. Motor de Consenso Dual (Gemini + Llama 3.3)', async (t) => {
+  await t.test('debe identificar pronósticos coincidentes y marcarlos como consenso', () => {
+    const geminiData = {
+      resumen: 'Real Madrid dominará el encuentro con alta posesión.',
+      porQue: ['Promedia 2.4 goles por partido en casa.'],
+      mercados: [
+        {
+          mercado: 'Real Madrid gana',
+          categoria: 'main',
+          probModelo: 68,
+          cuotaReal: 1.45,
+          casaApuesta: 'Bet365',
+          lectura: 'Favorito claro.',
+        },
+        {
+          mercado: 'Más de 8.5 córners',
+          categoria: 'corners',
+          probModelo: 62,
+          cuotaReal: 1.65,
+          casaApuesta: 'Bet365',
+          lectura: 'Ambos equipos generan volumen en bandas.',
+        },
+      ],
+      riesgos: ['Rotaciones por partido europeo intersemanal.'],
+      confianza: 'alta',
+      aviso: 'Estimación estadística, no resultado seguro.',
+      textoCompleto: 'Texto completo.',
+      isAiGenerated: true,
+    };
+
+    const llamaData = {
+      resumen: 'El Real Madrid tiene una ventaja clara según las métricas ofensivas.',
+      porQue: ['Rachas recientes favorables.'],
+      mercados: [
+        {
+          mercado: 'Real Madrid gana',
+          categoria: 'main',
+          probModelo: 72,
+          cuotaReal: 1.45,
+          casaApuesta: 'Bet365',
+          lectura: 'Supera al rival en efectividad.',
+        },
+        {
+          mercado: 'Ambos Marcan - Sí',
+          categoria: 'main',
+          probModelo: 55,
+          cuotaReal: 1.80,
+          casaApuesta: 'Winamax',
+          lectura: 'Defensas con concesiones.',
+        },
+      ],
+      riesgos: ['Meteorología adversa.'],
+      confianza: 'alta',
+      aviso: 'Estimación estadística, no resultado seguro.',
+      textoCompleto: 'Texto completo.',
+      isAiGenerated: true,
+    };
+
+    const merged = GeminiService.mergeConsensus(geminiData, llamaData, 'alta');
+
+    assert.ok(merged);
+    assert.ok(merged.consensusInfo);
+    assert.equal(merged.consensusInfo.modelsAgreed.length, 2);
+    // El mercado 'Real Madrid gana' coincidió en ambas IAs
+    const winMarket = merged.mercados.find((m) => m.mercado.includes('Real Madrid'));
+    assert.ok(winMarket, 'Debe incluir el mercado de victoria del Real Madrid');
+    assert.equal(winMarket?.isConsensus, true, 'El mercado coincidente debe tener isConsensus = true');
+    // La probabilidad promedio de 68 y 72 es 70
+    assert.equal(winMarket?.probModelo, 70);
+    // El resumen debe destacar el consenso
+    assert.match(merged.resumen, /Consenso/);
+  });
+});
+

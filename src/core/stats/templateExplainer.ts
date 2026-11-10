@@ -20,6 +20,7 @@ export interface AnalysisMarketItem {
   cuotaReal: number | null;
   casaApuesta?: 'Bet365' | 'Winamax';
   lectura: string;
+  isConsensus?: boolean;
 }
 
 export interface StructuredAnalysisResponse {
@@ -31,6 +32,11 @@ export interface StructuredAnalysisResponse {
   aviso: string;
   textoCompleto: string;
   isAiGenerated: boolean;
+  consensusInfo?: {
+    modelsAgreed: string[];
+    isFullConsensus: boolean;
+    agreementCount?: number;
+  };
 }
 
 export class TemplateExplainer {

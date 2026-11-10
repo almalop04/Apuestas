@@ -33,7 +33,7 @@ export function AiAnalysisCard({
 }: AiAnalysisCardProps) {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'limit_reached' | 'error'>('idle');
   const [analysis, setAnalysis] = useState<StructuredAnalysisResponse | null>(null);
-  const [source, setSource] = useState<'gemini' | 'template' | null>(null);
+  const [source, setSource] = useState<'consensus' | 'gemini' | 'llama' | 'template' | null>(null);
   const [quota, setQuota] = useState<GeminiQuotaStatus | null>(null);
   const [generatedAt, setGeneratedAt] = useState<string | null>(null);
   const [fallbackReason, setFallbackReason] = useState<string | null>(null);
@@ -203,14 +203,35 @@ export function AiAnalysisCard({
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-              {/* Etiqueta de procedencia */}
+              {/* Etiqueta de procedencia con Consenso Dual */}
               <span
                 style={{
                   fontSize: '0.75rem',
-                  fontWeight: 500,
-                  color: source === 'gemini' ? '#A78BFA' : 'var(--color-accent)',
-                  background: source === 'gemini' ? 'rgba(139, 92, 246, 0.12)' : 'rgba(45, 212, 167, 0.12)',
-                  border: source === 'gemini' ? '1px solid rgba(139, 92, 246, 0.3)' : '1px solid rgba(45, 212, 167, 0.3)',
+                  fontWeight: 600,
+                  color:
+                    source === 'consensus'
+                      ? '#38BDF8'
+                      : source === 'gemini'
+                      ? '#A78BFA'
+                      : source === 'llama'
+                      ? '#F59E0B'
+                      : 'var(--color-accent)',
+                  background:
+                    source === 'consensus'
+                      ? 'rgba(56, 189, 248, 0.15)'
+                      : source === 'gemini'
+                      ? 'rgba(139, 92, 246, 0.12)'
+                      : source === 'llama'
+                      ? 'rgba(245, 158, 11, 0.12)'
+                      : 'rgba(45, 212, 167, 0.12)',
+                  border:
+                    source === 'consensus'
+                      ? '1px solid rgba(56, 189, 248, 0.4)'
+                      : source === 'gemini'
+                      ? '1px solid rgba(139, 92, 246, 0.3)'
+                      : source === 'llama'
+                      ? '1px solid rgba(245, 158, 11, 0.3)'
+                      : '1px solid rgba(45, 212, 167, 0.3)',
                   padding: '3px 8px',
                   borderRadius: 'var(--radius-sm)',
                   display: 'inline-flex',
@@ -218,7 +239,15 @@ export function AiAnalysisCard({
                   gap: '0.3rem',
                 }}
               >
-                <span>{source === 'gemini' ? '✨ Generado por IA (Gemini)' : '⚙️ Explicación automática (Plantilla)'}</span>
+                <span>
+                  {source === 'consensus'
+                    ? '🤝 Consenso Dual (Google Gemini + Meta Llama 3.3)'
+                    : source === 'gemini'
+                    ? '✨ Generado por IA (Google Gemini)'
+                    : source === 'llama'
+                    ? '🦙 Generado por IA (Meta Llama 3.3)'
+                    : '⚙️ Explicación automática (Plantilla)'}
+                </span>
                 {generatedAt && <span style={{ opacity: 0.8 }}>· {generatedAt}</span>}
               </span>
 
@@ -418,7 +447,25 @@ export function AiAnalysisCard({
                           <td style={{ padding: '0.6rem 0.75rem', fontWeight: 500, color: 'var(--color-text-primary)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                               <span>{m.mercado}</span>
-                              {m.probModelo >= 65 ? (
+                              {m.isConsensus ? (
+                                <span
+                                  style={{
+                                    fontSize: '0.625rem',
+                                    padding: '1px 6px',
+                                    borderRadius: '3px',
+                                    background: 'rgba(56, 189, 248, 0.2)',
+                                    color: '#38BDF8',
+                                    fontWeight: 700,
+                                    border: '1px solid rgba(56, 189, 248, 0.4)',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '0.2rem',
+                                  }}
+                                  title="Pronóstico verificado y acordado tanto por Google Gemini como por Meta Llama 3.3"
+                                >
+                                  🤝 Consenso Dual
+                                </span>
+                              ) : m.probModelo >= 65 ? (
                                 <span
                                   style={{
                                     fontSize: '0.625rem',
