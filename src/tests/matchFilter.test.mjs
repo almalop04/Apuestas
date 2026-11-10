@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { hasMatchStarted, filterBettableMatches } from '../core/utils/matchFilter.ts';
+import { hasMatchStarted, filterBettableMatches, isGLeagueMatch } from '../core/utils/matchFilter.ts';
 
 function createDummyMatch(overrides = {}) {
   return {
@@ -78,5 +78,34 @@ test('4. Filtrado de partidos apostables (filterBettableMatches)', () => {
   assert.equal(bettable.length, 2, 'Solo deben quedar 2 partidos en los que todavía se puede apostar');
   assert.equal(bettable[0].id, 'upcoming-1');
   assert.equal(bettable[1].id, 'upcoming-2');
+});
+
+test('5. Exclusión estricta de la G League en baloncesto', () => {
+  const gLeagueMatch1 = createDummyMatch({
+    id: 'gleague-1',
+    sport: 'basketball',
+    league: { id: 'nba', name: 'NBA G League', country: 'Estados Unidos', season: '2026/2027' },
+    kickoffTimestamp: Date.now() + 100000,
+  });
+  const gLeagueMatch2 = createDummyMatch({
+    id: 'gleague-2',
+    sport: 'basketball',
+    league: { id: 'gleague', name: 'G-League', country: 'Estados Unidos', season: '2026/2027' },
+    kickoffTimestamp: Date.now() + 100000,
+  });
+  const regularNbaMatch = createDummyMatch({
+    id: 'nba-real',
+    sport: 'basketball',
+    league: { id: 'nba', name: 'NBA', country: 'Estados Unidos', season: '2026/2027' },
+    kickoffTimestamp: Date.now() + 100000,
+  });
+
+  assert.equal(isGLeagueMatch(gLeagueMatch1), true, 'Debe identificar NBA G League como partido a excluir');
+  assert.equal(isGLeagueMatch(gLeagueMatch2), true, 'Debe identificar G-League como partido a excluir');
+  assert.equal(isGLeagueMatch(regularNbaMatch), false, 'La NBA regular no debe excluirse');
+
+  const filtered = filterBettableMatches([gLeagueMatch1, gLeagueMatch2, regularNbaMatch]);
+  assert.equal(filtered.length, 1, 'Solo debe quedar el partido de NBA regular');
+  assert.equal(filtered[0].id, 'nba-real');
 });
 

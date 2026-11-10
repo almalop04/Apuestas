@@ -13,6 +13,7 @@
  */
 
 import type { MatchDetail, SportType, ApiQuotaStatus } from '../core/models.ts';
+import { isGLeagueMatch } from '../core/utils/matchFilter.ts';
 import { CacheManager } from './cache/cacheManager.ts';
 import { QuotaTracker } from './cache/quotaTracker.ts';
 import { MockSportsProvider } from './providers/mockProvider.ts';
@@ -99,8 +100,9 @@ export class SportsRepository {
         matches = await this.mockProvider.getTodayMatches(sport, dayOffset);
       }
 
-      // Enriquecer partidos con datos oficiales verídicos de la temporada actual
+      // Enriquecer partidos con datos oficiales verídicos de la temporada actual (excluyendo expresamente G League)
       if (matches.length > 0) {
+        matches = matches.filter((m) => !isGLeagueMatch(m));
         matches = await Promise.all(
           matches.map((m) => SeasonStandingsService.enrichMatchWithSeasonStats(m))
         );

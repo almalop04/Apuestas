@@ -43,10 +43,38 @@ export function hasMatchStarted(match: MatchDetail, nowEpochMs: number = Date.no
 }
 
 /**
+ * Detecta si un encuentro pertenece a la G League (liga de desarrollo),
+ * ligas menores o filiales para excluirlo rotundamente de las apuestas de baloncesto.
+ */
+export function isGLeagueMatch(match: MatchDetail): boolean {
+  const leagueName = (match.league?.name || '').toLowerCase();
+  const leagueId = (match.league?.id || '').toLowerCase();
+  const round = (match.league?.round || '').toLowerCase();
+  const home = (match.homeTeam?.name || '').toLowerCase();
+  const away = (match.awayTeam?.name || '').toLowerCase();
+
+  return (
+    leagueName.includes('g league') ||
+    leagueName.includes('g-league') ||
+    leagueName.includes('gleague') ||
+    leagueId.includes('gleague') ||
+    leagueId.includes('g-league') ||
+    round.includes('g league') ||
+    round.includes('g-league') ||
+    round.includes('gleague') ||
+    home.includes('g league') ||
+    home.includes('g-league') ||
+    away.includes('g league') ||
+    away.includes('g-league')
+  );
+}
+
+/**
  * Filtra la lista de partidos dejando únicamente aquellos disponibles para apostar (pre-partido).
- * Elimina automáticamente cualquier encuentro cuya hora de inicio ya haya llegado o pasado.
+ * Elimina automáticamente cualquier encuentro cuya hora de inicio ya haya llegado o pasado,
+ * así como competiciones no deseadas como la G League.
  */
 export function filterBettableMatches(matches: MatchDetail[], nowEpochMs: number = Date.now()): MatchDetail[] {
-  return matches.filter((m) => !hasMatchStarted(m, nowEpochMs));
+  return matches.filter((m) => !hasMatchStarted(m, nowEpochMs) && !isGLeagueMatch(m));
 }
 

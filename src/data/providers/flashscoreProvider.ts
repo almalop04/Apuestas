@@ -178,10 +178,13 @@ export class FlashscoreSportsProvider implements SportsDataProvider {
         const homeName = dict['AE'];
         const awayName = dict['AF'];
 
-        // Excluir equipos juveniles, filiales o femeninos que puedan colarse en copas
+        // Excluir equipos juveniles, filiales, G-League o femeninos que puedan colarse en copas
         const lowerH = homeName.toLowerCase();
         const lowerA = awayName.toLowerCase();
         if (
+          lowerH.includes('g league') || lowerA.includes('g league') ||
+          lowerH.includes('g-league') || lowerA.includes('g-league') ||
+          lowerH.includes('gleague') || lowerA.includes('gleague') ||
           lowerH.includes('sub-') || lowerA.includes('sub-') ||
           lowerH.includes('u18') || lowerA.includes('u18') ||
           lowerH.includes('u19') || lowerA.includes('u19') ||
@@ -498,11 +501,16 @@ export class FlashscoreSportsProvider implements SportsDataProvider {
     }
 
     if (sport === 'basketball') {
-      // Excluir femenino, WNBA y juveniles
+      // Excluir femenino, WNBA, G-League, ligas de desarrollo y juveniles
       if (
         l.includes('femenin') ||
         l.includes('women') ||
         l.includes('wnba') ||
+        l.includes('g-league') ||
+        l.includes('g league') ||
+        l.includes('gleague') ||
+        l.includes('development') ||
+        l.includes('summer league') ||
         l.includes('sub-') ||
         l.includes('u19') ||
         l.includes('u20')
@@ -510,9 +518,14 @@ export class FlashscoreSportsProvider implements SportsDataProvider {
         return null;
       }
 
-      // 1. NBA
+      // 1. NBA (EXCLUSIVAMENTE la NBA principal, nunca G-League ni WNBA)
+      if (l.includes('g-league') || l.includes('g league') || l.includes('gleague')) {
+        return null;
+      }
       if ((c.includes('estados unidos') || c.includes('usa') || l.includes('nba')) && !l.includes('wnba')) {
-        if (l.includes('nba')) return { id: 'nba', name: 'NBA', country: 'Estados Unidos', round: 'Temporada Regular' };
+        if (l.includes('nba') && !l.includes('g league') && !l.includes('g-league') && !l.includes('gleague')) {
+          return { id: 'nba', name: 'NBA', country: 'Estados Unidos', round: 'Temporada Regular' };
+        }
       }
 
       // 2. Euroliga
